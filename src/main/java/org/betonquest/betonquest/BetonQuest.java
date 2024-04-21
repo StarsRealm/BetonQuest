@@ -94,6 +94,7 @@ import org.betonquest.betonquest.conversation.ConversationColors;
 import org.betonquest.betonquest.conversation.ConversationData;
 import org.betonquest.betonquest.conversation.ConversationIO;
 import org.betonquest.betonquest.conversation.ConversationResumer;
+import org.betonquest.betonquest.conversation.DialogIO;
 import org.betonquest.betonquest.conversation.Interceptor;
 import org.betonquest.betonquest.conversation.InventoryConvIO;
 import org.betonquest.betonquest.conversation.NonInterceptingInterceptor;
@@ -1013,6 +1014,7 @@ public class BetonQuest extends JavaPlugin {
         registerConversationIO("chest", InventoryConvIO.class);
         registerConversationIO("combined", InventoryConvIO.Combined.class);
         registerConversationIO("slowtellraw", SlowTellrawConvIO.class);
+        registerConversationIO("dialog", DialogIO.class);
 
         registerInterceptor("simple", SimpleInterceptor.class);
         registerInterceptor("none", NonInterceptingInterceptor.class);
