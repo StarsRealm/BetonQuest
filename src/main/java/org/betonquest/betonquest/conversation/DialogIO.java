@@ -2,13 +2,13 @@ package org.betonquest.betonquest.conversation;
 
 import com.starsrealm.starock.api.form.element.NpcDialogueButton;
 import com.starsrealm.starock.form.NpcDialogueForm;
-import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.compatibility.citizens.CitizensConversation;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("PMD.CommentRequired")
 /**
@@ -19,11 +19,11 @@ public class DialogIO implements ConversationIO {
 
     private final Entity entity;
     private final Player player;
-
-
     private final CitizensConversation conv;
+    private final List<String> endConversations = new ArrayList<>();
 
     private NpcDialogueForm npcDialogueForm;
+
 
     public DialogIO(final Conversation conv, final OnlineProfile onlineProfile) {
         this.conv = (CitizensConversation) conv;
@@ -38,12 +38,14 @@ public class DialogIO implements ConversationIO {
     public void setNpcResponse(final String npcName, final String response) {
         npcDialogueForm.hasNextForm(true).bindEntity(entity).dialogue(response).title(npcName);
         npcDialogueForm.handler((s, i) -> {
-            conv.passPlayerAnswer(i);
+            endConversations.add(s);
+            conv.passPlayerAnswer(i + 1);
         });
 
         npcDialogueForm.closeHandler(close -> {
-            BetonQuest.getInstance().getLogger().info(close);
-            conv.endConversation();
+            if(!endConversations.contains(close)) {
+                conv.endConversation();
+            }
         });
     }
 
@@ -52,6 +54,7 @@ public class DialogIO implements ConversationIO {
         final NpcDialogueButton button = new NpcDialogueButton();
         button.mode(NpcDialogueButton.ButtonMode.BUTTON_MODE);
         button.text(option);
+        button.commands(new ArrayList<>());
         npcDialogueForm.buttons().add(button);
     }
 
