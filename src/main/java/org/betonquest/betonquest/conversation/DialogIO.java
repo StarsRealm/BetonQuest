@@ -55,6 +55,7 @@ public class DialogIO implements ConversationIO {
         button.mode(NpcDialogueButton.ButtonMode.BUTTON_MODE);
         button.text(option);
         button.commands(new ArrayList<>());
+        button.hasNextForm(true);
         npcDialogueForm.buttons().add(button);
     }
 
