@@ -13,6 +13,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `resourcepack` objective - to allow checking when the player accepts, denies, downloads, or fails to download a resource pack 
 - `region` objective now supports variables as region name
 - `location` objective now allows `entry` and `exit` keywords to track entering and leaving the location
+- allowing adjustment of maximum hologram display radius
 ### Changed
 - player variable
   - `%player%` is now the same as `%player.name%`
@@ -33,6 +34,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `burn` event throwing unexpected error when omitting duration
 - added missing firework meta to string representation of QuestItem
 - required flags in `QuestItem` were not relevant in equals check
+- `folder` event did not respect the sync / async context that it is executed in
 ### Security
 
 ## [2.0.1] - 2024-03-24
