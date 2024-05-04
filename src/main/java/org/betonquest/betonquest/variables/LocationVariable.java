@@ -1,12 +1,10 @@
 package org.betonquest.betonquest.variables;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.Instruction;
 import org.betonquest.betonquest.api.Variable;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.bukkit.Location;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -41,11 +39,6 @@ public class LocationVariable extends Variable {
      * optional precision number of decimals.
      */
     private static final int MINIMUM_INSTRUCTION_ARGUMENTS_WITH_OPTIONAL_PRECISION = 3;
-
-    /**
-     * The default String value to return if the Player Profile cannot be resolved.
-     */
-    private static final String DEFAULT_VALUE = null;
 
     /**
      * The mode of the location response required. Provides multiple output formats.
@@ -90,7 +83,7 @@ public class LocationVariable extends Variable {
     public String getValue(final Profile profile) {
         return profile.getOnlineProfile()
                 .map(onlineProfile -> getForLocation(onlineProfile.getPlayer().getLocation()))
-                .orElse(DEFAULT_VALUE);
+                .orElse("");
     }
 
     /**
@@ -100,7 +93,6 @@ public class LocationVariable extends Variable {
      * @return The value for the given location.
      */
     @SuppressWarnings("PMD.CyclomaticComplexity")
-    @NotNull
     public String getForLocation(final Location location) {
         return switch (mode) {
             case XYZ -> buildFormattedLocation(location, buildPart(1) + " " + buildPart(2) + " " + buildPart(3));
@@ -117,7 +109,6 @@ public class LocationVariable extends Variable {
         };
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     private String buildFormattedLocation(final Location playerLocation, final String format) {
         final double posX = playerLocation.getX();
         final double posY = playerLocation.getY();

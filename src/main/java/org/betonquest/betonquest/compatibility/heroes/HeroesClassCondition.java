@@ -9,20 +9,23 @@ import org.betonquest.betonquest.api.Condition;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
 /**
  * Checks the class of the player and the level.
  */
-@SuppressWarnings({"PMD.CommentRequired", "PMD.CyclomaticComplexity"})
+@SuppressWarnings("PMD.CommentRequired")
 public class HeroesClassCondition extends Condition {
     private final boolean primary;
 
     private final boolean mastered;
 
+    @Nullable
     private final VariableNumber level;
 
+    @Nullable
     private final HeroClass heroClass;
 
     private final boolean any;

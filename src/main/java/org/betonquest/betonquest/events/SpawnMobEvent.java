@@ -1,6 +1,5 @@
 package org.betonquest.betonquest.events;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
 import org.betonquest.betonquest.Instruction.Item;
@@ -20,6 +19,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
@@ -34,22 +34,30 @@ public class SpawnMobEvent extends QuestEvent {
 
     private final VariableNumber amount;
 
+    @Nullable
     private final QuestItem helmet;
 
+    @Nullable
     private final QuestItem chestplate;
 
+    @Nullable
     private final QuestItem leggings;
 
+    @Nullable
     private final QuestItem boots;
 
+    @Nullable
     private final QuestItem mainHand;
 
+    @Nullable
     private final QuestItem offHand;
 
     private final Item[] drops;
 
+    @Nullable
     private final String name;
 
+    @Nullable
     private final VariableString marked;
 
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
@@ -89,27 +97,28 @@ public class SpawnMobEvent extends QuestEvent {
     }
 
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.CognitiveComplexity"})
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @Override
-    protected Void execute(final Profile profile) throws QuestRuntimeException {
+    protected Void execute(@Nullable final Profile profile) throws QuestRuntimeException {
         final Location location = loc.getLocation(profile);
         final int pAmount = amount.getInt(profile);
         for (int i = 0; i < pAmount; i++) {
             final Entity entity = location.getWorld().spawnEntity(location, type);
             if (entity instanceof final LivingEntity living) {
                 final EntityEquipment equipment = living.getEquipment();
-                equipment.setHelmet(helmet == null ? null : helmet.generate(1));
-                equipment.setHelmetDropChance(0);
-                equipment.setChestplate(chestplate == null ? null : chestplate.generate(1));
-                equipment.setChestplateDropChance(0);
-                equipment.setLeggings(leggings == null ? null : leggings.generate(1));
-                equipment.setLeggingsDropChance(0);
-                equipment.setBoots(boots == null ? null : boots.generate(1));
-                equipment.setBootsDropChance(0);
-                equipment.setItemInMainHand(mainHand == null ? null : mainHand.generate(1));
-                equipment.setItemInMainHandDropChance(0);
-                equipment.setItemInOffHand(offHand == null ? null : offHand.generate(1));
-                equipment.setItemInOffHandDropChance(0);
+                if (equipment != null) {
+                    equipment.setHelmet(helmet == null ? null : helmet.generate(1));
+                    equipment.setHelmetDropChance(0);
+                    equipment.setChestplate(chestplate == null ? null : chestplate.generate(1));
+                    equipment.setChestplateDropChance(0);
+                    equipment.setLeggings(leggings == null ? null : leggings.generate(1));
+                    equipment.setLeggingsDropChance(0);
+                    equipment.setBoots(boots == null ? null : boots.generate(1));
+                    equipment.setBootsDropChance(0);
+                    equipment.setItemInMainHand(mainHand == null ? null : mainHand.generate(1));
+                    equipment.setItemInMainHandDropChance(0);
+                    equipment.setItemInOffHand(offHand == null ? null : offHand.generate(1));
+                    equipment.setItemInOffHandDropChance(0);
+                }
             }
             int dropIndex = 0;
             for (final Item item : drops) {

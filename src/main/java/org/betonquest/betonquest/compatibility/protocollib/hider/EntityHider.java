@@ -22,6 +22,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,6 +88,7 @@ public class EntityHider implements Listener {
 
     protected Table<Integer, Integer, Boolean> observerEntityMap = HashBasedTable.create();
 
+    @Nullable
     private ProtocolManager manager;
 
     /**
@@ -119,15 +121,12 @@ public class EntityHider implements Listener {
      */
     @SuppressWarnings("PMD.LinguisticNaming")
     protected boolean setVisibility(final OnlineProfile observer, final int entityID, final boolean visible) {
-        switch (policy) {
-            case BLACKLIST:
+        return switch (policy) {
+            case BLACKLIST ->
                 // Non-membership means they are visible
-                return !setMembership(observer, entityID, !visible);
-            case WHITELIST:
-                return setMembership(observer, entityID, visible);
-            default:
-                throw new IllegalArgumentException("Unknown policy: " + policy);
-        }
+                    !setMembership(observer, entityID, !visible);
+            case WHITELIST -> setMembership(observer, entityID, visible);
+        };
     }
 
     /**
@@ -292,12 +291,11 @@ public class EntityHider implements Listener {
      * @param entity   - the entity to hide.
      * @return TRUE if the entity was previously visible, FALSE otherwise.
      */
-    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     public final boolean hideEntity(final OnlineProfile observer, final Entity entity) {
         validate(observer, entity);
         final boolean visibleBefore = setVisibility(observer, entity.getEntityId(), false);
 
-        if (visibleBefore) {
+        if (visibleBefore && manager != null) {
             final PacketContainer destroyEntity = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
             if (PaperLib.isVersion(17, 1)) {
                 destroyEntity.getIntLists().write(0, Collections.singletonList(entity.getEntityId()));

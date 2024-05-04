@@ -1,6 +1,5 @@
 package org.betonquest.betonquest.compatibility.mythicmobs;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.events.MythicMobDeathEvent;
 import io.lumine.mythic.core.mobs.ActiveMob;
@@ -21,6 +20,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.metadata.MetadataValue;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -60,6 +60,7 @@ public class MythicMobKillObjective extends CountingObjective implements Listene
     /**
      * The text with which the mob must have been marked to count.
      */
+    @Nullable
     protected VariableString marked;
 
     /**
@@ -98,8 +99,6 @@ public class MythicMobKillObjective extends CountingObjective implements Listene
      *
      * @param event the MythicMobDeathEvent
      */
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.CognitiveComplexity"})
     @EventHandler(ignoreCancelled = true)
     public void onBossKill(final MythicMobDeathEvent event) {
         if (!names.contains(event.getMobType().getInternalName())
@@ -136,7 +135,7 @@ public class MythicMobKillObjective extends CountingObjective implements Listene
         handlePlayerKill(onlineProfile, event.getMob());
     }
 
-    private boolean isValidPlayer(final Player player) {
+    private boolean isValidPlayer(@Nullable final Player player) {
         return player != null
                 && player.isOnline()
                 && player.isValid();

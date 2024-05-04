@@ -20,6 +20,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -60,11 +61,13 @@ public class CitizensListener implements Listener {
     /**
      * A listener for right-clicking a Citizens NPC.
      */
+    @Nullable
     private RightClickListener rightClick;
 
     /**
      * A listener for left-clicking a Citizens NPC.
      */
+    @Nullable
     private LeftClickListener leftClick;
 
     /**
@@ -112,7 +115,7 @@ public class CitizensListener implements Listener {
      *
      * @param event the event for the NPC interaction
      */
-    @SuppressWarnings({"PMD.AvoidLiteralsInIfCondition", "PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     private void interactLogic(final NPCClickEvent event) {
         if (!event.getClicker().hasPermission("betonquest.conversation")) {
             return;

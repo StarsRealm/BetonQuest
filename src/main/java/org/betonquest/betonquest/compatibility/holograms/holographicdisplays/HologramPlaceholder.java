@@ -6,16 +6,12 @@ import org.betonquest.betonquest.api.logger.BetonQuestLogger;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.utils.PlayerConverter;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Defines HolographicDisplays placeholder <code>{bq:package:variable}</code>.
  */
 public class HologramPlaceholder implements IndividualPlaceholder {
-    /**
-     * Custom {@link BetonQuestLogger} instance for this class.
-     */
     /**
      * Custom {@link BetonQuestLogger} instance for this class.
      */
@@ -34,8 +30,8 @@ public class HologramPlaceholder implements IndividualPlaceholder {
     }
 
     @Override
-    public @Nullable
-    String getReplacement(@NotNull final Player player, @Nullable final String arguments) {
+    @Nullable
+    public String getReplacement(final Player player, @Nullable final String arguments) {
         if (arguments == null) {
             return "";
         }
