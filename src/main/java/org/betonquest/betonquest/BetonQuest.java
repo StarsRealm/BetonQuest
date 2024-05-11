@@ -110,7 +110,6 @@ import org.betonquest.betonquest.database.MySQL;
 import org.betonquest.betonquest.database.PlayerData;
 import org.betonquest.betonquest.database.SQLite;
 import org.betonquest.betonquest.database.Saver;
-import org.betonquest.betonquest.events.CompassEvent;
 import org.betonquest.betonquest.events.FolderEvent;
 import org.betonquest.betonquest.events.ObjectiveEvent;
 import org.betonquest.betonquest.events.RunEvent;
@@ -213,6 +212,7 @@ import org.betonquest.betonquest.quest.event.chest.ChestTakeEventFactory;
 import org.betonquest.betonquest.quest.event.command.CommandEventFactory;
 import org.betonquest.betonquest.quest.event.command.OpSudoEventFactory;
 import org.betonquest.betonquest.quest.event.command.SudoEventFactory;
+import org.betonquest.betonquest.quest.event.compass.CompassEventFactory;
 import org.betonquest.betonquest.quest.event.conversation.CancelConversationEventFactory;
 import org.betonquest.betonquest.quest.event.conversation.ConversationEventFactory;
 import org.betonquest.betonquest.quest.event.damage.DamageEventFactory;
@@ -899,6 +899,7 @@ public class BetonQuest extends JavaPlugin {
 
         registerEvents("objective", ObjectiveEvent.class);
         registerEvent("command", new CommandEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
+        registerNonStaticEvent("compass", new CompassEventFactory(loggerFactory, this, getServer().getPluginManager(), getServer(), getServer().getScheduler()));
         registerEvent("tag", new TagPlayerEventFactory(this, getSaver()));
         registerEvent("globaltag", new TagGlobalEventFactory(this));
         registerEvent("journal", new JournalEventFactory(loggerFactory, this, InstantSource.system(), getSaver()));
@@ -930,7 +931,6 @@ public class BetonQuest extends JavaPlugin {
         registerEvent("chestgive", new ChestGiveEventFactory(getServer(), getServer().getScheduler(), this));
         registerEvent("chesttake", new ChestTakeEventFactory(getServer(), getServer().getScheduler(), this));
         registerEvent("chestclear", new ChestClearEventFactory(getServer(), getServer().getScheduler(), this));
-        registerEvents("compass", CompassEvent.class);
         registerNonStaticEvent("cancel", new CancelEventFactory(loggerFactory));
         registerNonStaticEvent("score", new ScoreboardEventFactory(getServer(), getServer().getScheduler(), this));
         registerEvent("lever", new LeverEventFactory(getServer(), getServer().getScheduler(), this));

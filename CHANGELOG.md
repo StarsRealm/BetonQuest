@@ -6,6 +6,27 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+### Changed
+- `AureliumSkills` was renamed to `AuraSkills` the following was changed in BQ
+  - `aureliumskillslevel` condition was renamed to `auraskillslevel`
+  - `aureliumstatslevel` condition was renamed to `auraskillsstatslevel`
+  - `aureliumskillsxp` event was renamed to `auraskillsxp`
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [2.1.1] - 2024-05-09
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+- math variable with dots (since 2.1.0)
+### Security
+
+## [2.1.0] - 2024-05-09
+### Added
 - `block` objective now supports parameters `loc` and `region` to limit the area
 - `block` objective now supports the parameter `ignorecancel` allow counting breaking / placing blocks in protected regions
 - command `variable` to list and modify variables on a variable objective
@@ -27,7 +48,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - corrected Russian messages in `messages.yml` file
 ### Deprecated
 ### Removed
-- undocumented quoting in instructions
 ### Fixed
 - `variable` objective loads newlines correctly
 - exception in `lookAtBlock` condition when omitting the type
@@ -39,6 +59,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - required flags in `QuestItem` were not relevant in equals check
 - `folder` event did not respect the sync / async context that it is executed in
 - incorrectly measuring the distance between player and hologram if they are in different worlds
+- incorrect calculation of the width of strings when using some special characters when doing pagination 
+- previously undocumented quoting in instructions
 ### Security
 
 ## [2.0.1] - 2024-03-24
