@@ -89,7 +89,7 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.GodClass", "PMD.NPathComplexity", "PMD.TooManyMethods",
         "PMD.CommentRequired", "PMD.AvoidDuplicateLiterals", "PMD.AvoidLiteralsInIfCondition",
-        "PMD.CognitiveComplexity"})
+        "PMD.CognitiveComplexity", "PMD.CouplingBetweenObjects"})
 public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
     /**
      * The {@link BetonQuestLoggerFactory} to use for creating {@link BetonQuestLogger} instances.
@@ -804,7 +804,6 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
         }
         // done
         sendMessage(sender, "item_created", args[1]);
-
     }
 
     /**
@@ -826,7 +825,7 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
      */
     private void handleEvents(final CommandSender sender, final String... args) {
         // the player has to be specified every time
-        if (args.length < 2 || Bukkit.getPlayer(args[1]) == null && !args[1].equals("-")) {
+        if (args.length < 2 || Bukkit.getPlayer(args[1]) == null && !"-".equals(args[1])) {
             log.debug("Player's name is missing or he's offline");
             sendMessage(sender, "specify_player");
             return;
@@ -847,7 +846,7 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
         // fire the event
         final Profile profile = "-".equals(args[1]) ? null : PlayerConverter.getID(Bukkit.getOfflinePlayer(args[1]));
         BetonQuest.event(profile, eventID);
-        sendMessage(sender, "player_event", eventID.generateInstruction().toString());
+        sendMessage(sender, "player_event", eventID.getInstruction().toString());
     }
 
     /**
@@ -872,7 +871,7 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
      */
     private void handleConditions(final CommandSender sender, final String... args) {
         // the player has to be specified every time
-        if (args.length < 2 || Bukkit.getPlayer(args[1]) == null && !args[1].equals("-")) {
+        if (args.length < 2 || Bukkit.getPlayer(args[1]) == null && !"-".equals(args[1])) {
             log.debug("Player's name is missing or he's offline");
             sendMessage(sender, "specify_player");
             return;
@@ -893,7 +892,7 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
         }
         // display message about condition
         final Profile profile = "-".equals(args[1]) ? null : PlayerConverter.getID(Bukkit.getOfflinePlayer(args[1]));
-        sendMessage(sender, "player_condition", (conditionID.inverted() ? "! " : "") + conditionID.generateInstruction(),
+        sendMessage(sender, "player_condition", (conditionID.inverted() ? "! " : "") + conditionID.getInstruction(),
                 Boolean.toString(BetonQuest.condition(profile, conditionID)));
     }
 
@@ -1265,7 +1264,7 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
                 // rename objective in the file
                 final MultiConfiguration configuration = nameID.getPackage().getConfig();
                 final String newPath = "objectives." + rename.split("\\.")[1];
-                configuration.set(newPath, nameID.generateInstruction().getInstruction());
+                configuration.set(newPath, nameID.getInstruction().getInstruction());
                 try {
                     configuration.associateWith(newPath, configuration.getSourceConfigurationSection(nameID.getBaseID()));
                     nameID.getPackage().saveAll();
@@ -1457,7 +1456,7 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
     private void displayHelp(final CommandSender sender, final String alias) {
         log.debug("Just displaying help");
         // specify all commands
-        final HashMap<String, String> cmds = new HashMap<>();
+        final Map<String, String> cmds = new HashMap<>();
         cmds.put("reload", "reload");
         cmds.put("objectives", "objective <player> [list/add/del] [objective]");
         cmds.put("globaltags", "globaltags [list/add/del/purge]");
@@ -1472,8 +1471,6 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
         cmds.put("variable", "variable <player> <variable> [list/set/del]");
         cmds.put("rename", "rename <tag/point/globalpoint/objective/journal> <old> <new>");
         cmds.put("delete", "delete <tag/point/objective/journal> <name>");
-        cmds.put("config", "config <read/set/add> <path> [string]");
-        cmds.put("vector", "vector <pack.varname> <vectorname>");
         cmds.put("version", "version");
         cmds.put("purge", "purge <player>");
         cmds.put("debug", "debug [true/false/ingame]");
@@ -1530,7 +1527,7 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
                 .hoverEvent(Component.text(clickToDownloadHint)).clickEvent(ClickEvent.runCommand(updateCommand))
                 : Component.empty();
 
-        final TreeMap<String, String> hookedTree = new TreeMap<>();
+        final Map<String, String> hookedTree = new TreeMap<>();
         for (final String plugin : Compatibility.getHooked()) {
             final Plugin plug = Bukkit.getPluginManager().getPlugin(plugin);
             if (plug != null) {
@@ -1891,6 +1888,10 @@ public class QuestCommand implements CommandExecutor, SimpleTabCompleter {
             Config.sendMessage(null, PlayerConverter.getID((Player) sender), messageName, variables);
         } else {
             final String message = Config.getMessage(Config.getLanguage(), messageName, variables);
+            if (message == null) {
+                log.warn("Missing message: " + messageName);
+                return;
+            }
             sender.sendMessage(message);
         }
     }

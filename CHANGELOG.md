@@ -6,14 +6,25 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+- LuckPerms permission events
+  - `addPermission` event adds a permission to a player
+  - `removePermission` event removes a permission from a player
+- Location Vectors can now be chained
 ### Changed
 - `AureliumSkills` was renamed to `AuraSkills` the following was changed in BQ
   - `aureliumskillslevel` condition was renamed to `auraskillslevel`
   - `aureliumstatslevel` condition was renamed to `auraskillsstatslevel`
   - `aureliumskillsxp` event was renamed to `auraskillsxp`
+- prevent reply when the text is not completely displayed for the SlowTellRaw conversation IO
+- `resourcepack` objective is now paper only
+- `die` objective now support respawns without canceling the actual death of the player
 ### Deprecated
 ### Removed
 ### Fixed
+- NPE if a player replies to a SlowTellRaw conversation IO when the text is not completely displayed
+- head `QuestItem` matches even if they are distinct 
+- modulo operator in math variable can now be used by escaping the percent sign
+- `weather` event not static callable even when providing a world
 ### Security
 
 ## [2.1.1] - 2024-05-09

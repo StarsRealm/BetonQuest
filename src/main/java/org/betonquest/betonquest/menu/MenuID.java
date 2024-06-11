@@ -14,10 +14,9 @@ public class MenuID extends ID {
 
     private final ConfigurationSection config;
 
+    @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
     public MenuID(@Nullable final QuestPackage pack, final String identifier) throws ObjectNotFoundException {
         super(pack, identifier);
-        super.rawInstruction = null;
-        //find file
         config = super.pack.getConfig().getConfigurationSection("menus." + super.getBaseID());
         if (config == null) {
             throw new ObjectNotFoundException("Menu '" + getFullID() + "' is not defined");

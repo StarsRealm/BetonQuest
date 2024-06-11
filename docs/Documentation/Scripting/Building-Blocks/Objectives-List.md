@@ -52,7 +52,7 @@ To complete this objective the player must break or place the specified amount o
   
 ```YAML
 objectives:
-  breakLogs: "block LOG -16 events:reward notify"
+  breakLogs: "block .*_LOG -16 events:reward notify"
   placeBricks: "block BRICKS 64 events:epicReward notify:5"
   breakIron: "block IRON_ORE -16 noSafety notify events:dailyReward"
 ```
@@ -222,14 +222,18 @@ objectives:
 
 ## Death: `die`
 
-Death objective completes when the player dies meeting all conditions. You can optionally cancel death with `cancel`
-argument. It will heal player and optionally teleport him to respawn location. There can be two arguments: `cancel`,
-which is optional, and `respawn:`, which is also optional and only used if there is the `cancel` argument set. You can
-add them right after type of objective.
+The death objective is completed when a player dies while fulfilling all conditions.
+If you set the `respawn` location the player will spawn at that location, after pressing respawn,
+and the objective will be completed then, not immediately on death.
+
+Optionally you can also add the `cancel` argument to prevent the player from dying.
+In this case, the player will be healed and all status effects will be removed.
+You can also specify the `respawn` location to which the player will be teleported to.
 
 !!! example
     ```YAML
-    die cancel respawn:100;200;300;world;90;0 events:teleport
+    die respawn:100;200;300;world;90;0 events:respawned
+    die cancel respawn:100;200;300;world;90;0 events:respawned
     ```
 
 ## :fontawesome-solid-fish-fins: Fishing: `fish`
@@ -287,6 +291,7 @@ initially required.
     ```
     
 ## Resource pack state: `resourcepack`
+**:fontawesome-solid-list-check:{.task} Objective  ·  :fontawesome-solid-paper-plane: Requires [Paper](https://papermc.io)**
 
 To complete this objective the player must have the specified resource pack state.
 The first argument is the state of the resource pack.

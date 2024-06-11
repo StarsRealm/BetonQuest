@@ -7,12 +7,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents a string that can contain variables.
  * Makes handling instructions with variables easier.
  */
 public class VariableString {
+    /**
+     * The pattern to match variables in a string marked with percent signs.<br>
+     * The percentage can be escaped with a backslash, and the backslash can be escaped with another backslash.
+     */
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("(?<!\\\\)(?:\\\\\\\\)*(%((?:[^%\\\\]|\\\\.)*?)%)(?<!\\\\)(?:\\\\\\\\)*");
 
     /**
      * The string that may contain variables.
@@ -60,9 +67,9 @@ public class VariableString {
             this.string = string;
         }
 
-        for (final String variable : BetonQuest.resolveVariables(this.string)) {
+        for (final String variable : resolveVariables(this.string)) {
             try {
-                BetonQuest.createVariable(questPackage, variable);
+                BetonQuest.createVariable(questPackage, replaceEscapedPercent(variable));
             } catch (final InstructionParseException exception) {
                 throw new InstructionParseException("Could not create '" + variable + "' variable: "
                         + exception.getMessage(), exception);
@@ -71,6 +78,18 @@ public class VariableString {
                 variables.add(variable);
             }
         }
+    }
+
+    private List<String> resolveVariables(final String text) {
+        final List<String> variables = new ArrayList<>();
+        final Matcher matcher = VARIABLE_PATTERN.matcher(text);
+        while (matcher.find()) {
+            final String variable = matcher.group();
+            if (!variables.contains(variable)) {
+                variables.add(variable);
+            }
+        }
+        return variables;
     }
 
     /**
@@ -82,10 +101,14 @@ public class VariableString {
     public String getString(@Nullable final Profile profile) {
         String resolvedString = string;
         for (final String variable : variables) {
-            final String resolvedVariable = BetonQuest.getInstance().getVariableValue(questPackage.getQuestPath(), variable, profile);
+            final String resolvedVariable = BetonQuest.getInstance().getVariableValue(questPackage.getQuestPath(), replaceEscapedPercent(variable), profile);
             resolvedString = resolvedString.replace(variable, resolvedVariable);
         }
         return resolvedString;
+    }
+
+    private String replaceEscapedPercent(final String input) {
+        return input.replaceAll("(?<!\\\\)\\\\%", "%");
     }
 
     /**

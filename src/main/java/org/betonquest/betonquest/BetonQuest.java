@@ -1,6 +1,5 @@
 package org.betonquest.betonquest;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.papermc.lib.PaperLib;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.apache.logging.log4j.LogManager;
@@ -20,13 +19,12 @@ import org.betonquest.betonquest.api.logger.BetonQuestLoggerFactory;
 import org.betonquest.betonquest.api.logger.CachingBetonQuestLoggerFactory;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.api.profiles.Profile;
+import org.betonquest.betonquest.api.quest.event.ComposedEventFactory;
 import org.betonquest.betonquest.api.quest.event.EventFactory;
 import org.betonquest.betonquest.api.quest.event.StaticEventFactory;
 import org.betonquest.betonquest.api.schedule.Schedule;
 import org.betonquest.betonquest.api.schedule.Scheduler;
 import org.betonquest.betonquest.bstats.BStatsMetrics;
-import org.betonquest.betonquest.bstats.CompositeInstructionMetricsSupplier;
-import org.betonquest.betonquest.bstats.InstructionMetricsSupplier;
 import org.betonquest.betonquest.commands.BackpackCommand;
 import org.betonquest.betonquest.commands.CancelQuestCommand;
 import org.betonquest.betonquest.commands.CompassCommand;
@@ -35,56 +33,6 @@ import org.betonquest.betonquest.commands.LangCommand;
 import org.betonquest.betonquest.commands.QuestCommand;
 import org.betonquest.betonquest.compatibility.Compatibility;
 import org.betonquest.betonquest.compatibility.protocollib.FreezeEvent;
-import org.betonquest.betonquest.conditions.AdvancementCondition;
-import org.betonquest.betonquest.conditions.AlternativeCondition;
-import org.betonquest.betonquest.conditions.ArmorCondition;
-import org.betonquest.betonquest.conditions.ArmorRatingCondition;
-import org.betonquest.betonquest.conditions.BiomeCondition;
-import org.betonquest.betonquest.conditions.BurningCondition;
-import org.betonquest.betonquest.conditions.CheckCondition;
-import org.betonquest.betonquest.conditions.ChestItemCondition;
-import org.betonquest.betonquest.conditions.ConjunctionCondition;
-import org.betonquest.betonquest.conditions.ConversationCondition;
-import org.betonquest.betonquest.conditions.DayOfWeekCondition;
-import org.betonquest.betonquest.conditions.EffectCondition;
-import org.betonquest.betonquest.conditions.EmptySlotsCondition;
-import org.betonquest.betonquest.conditions.EntityCondition;
-import org.betonquest.betonquest.conditions.ExperienceCondition;
-import org.betonquest.betonquest.conditions.FacingCondition;
-import org.betonquest.betonquest.conditions.FlyingCondition;
-import org.betonquest.betonquest.conditions.GameModeCondition;
-import org.betonquest.betonquest.conditions.GlobalPointCondition;
-import org.betonquest.betonquest.conditions.GlobalTagCondition;
-import org.betonquest.betonquest.conditions.HandCondition;
-import org.betonquest.betonquest.conditions.HealthCondition;
-import org.betonquest.betonquest.conditions.HeightCondition;
-import org.betonquest.betonquest.conditions.HungerCondition;
-import org.betonquest.betonquest.conditions.InConversationCondition;
-import org.betonquest.betonquest.conditions.ItemCondition;
-import org.betonquest.betonquest.conditions.ItemDurabilityCondition;
-import org.betonquest.betonquest.conditions.JournalCondition;
-import org.betonquest.betonquest.conditions.LanguageCondition;
-import org.betonquest.betonquest.conditions.LocationCondition;
-import org.betonquest.betonquest.conditions.LookingAtCondition;
-import org.betonquest.betonquest.conditions.MooncycleCondition;
-import org.betonquest.betonquest.conditions.NumberCompareCondition;
-import org.betonquest.betonquest.conditions.ObjectiveCondition;
-import org.betonquest.betonquest.conditions.PartialDateCondition;
-import org.betonquest.betonquest.conditions.PartyCondition;
-import org.betonquest.betonquest.conditions.PermissionCondition;
-import org.betonquest.betonquest.conditions.PointCondition;
-import org.betonquest.betonquest.conditions.RandomCondition;
-import org.betonquest.betonquest.conditions.RealTimeCondition;
-import org.betonquest.betonquest.conditions.RideCondition;
-import org.betonquest.betonquest.conditions.ScoreboardCondition;
-import org.betonquest.betonquest.conditions.SneakCondition;
-import org.betonquest.betonquest.conditions.StageCondition;
-import org.betonquest.betonquest.conditions.TagCondition;
-import org.betonquest.betonquest.conditions.TestForBlockCondition;
-import org.betonquest.betonquest.conditions.TimeCondition;
-import org.betonquest.betonquest.conditions.VariableCondition;
-import org.betonquest.betonquest.conditions.WeatherCondition;
-import org.betonquest.betonquest.conditions.WorldCondition;
 import org.betonquest.betonquest.config.Config;
 import org.betonquest.betonquest.config.QuestCanceler;
 import org.betonquest.betonquest.conversation.AnswerFilter;
@@ -110,22 +58,12 @@ import org.betonquest.betonquest.database.MySQL;
 import org.betonquest.betonquest.database.PlayerData;
 import org.betonquest.betonquest.database.SQLite;
 import org.betonquest.betonquest.database.Saver;
-import org.betonquest.betonquest.events.FolderEvent;
-import org.betonquest.betonquest.events.ObjectiveEvent;
-import org.betonquest.betonquest.events.RunEvent;
-import org.betonquest.betonquest.events.SpawnMobEvent;
-import org.betonquest.betonquest.events.TakeEvent;
-import org.betonquest.betonquest.events.VariableEvent;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
-import org.betonquest.betonquest.exceptions.ObjectNotFoundException;
-import org.betonquest.betonquest.exceptions.QuestRuntimeException;
 import org.betonquest.betonquest.id.ConditionID;
 import org.betonquest.betonquest.id.ConversationID;
 import org.betonquest.betonquest.id.EventID;
-import org.betonquest.betonquest.id.ID;
 import org.betonquest.betonquest.id.ObjectiveID;
 import org.betonquest.betonquest.id.QuestCancelerID;
-import org.betonquest.betonquest.id.VariableID;
 import org.betonquest.betonquest.item.QuestItemHandler;
 import org.betonquest.betonquest.menu.RPGMenu;
 import org.betonquest.betonquest.modules.config.DefaultConfigAccessorFactory;
@@ -169,114 +107,18 @@ import org.betonquest.betonquest.notify.SubTitleNotifyIO;
 import org.betonquest.betonquest.notify.SuppressNotifyIO;
 import org.betonquest.betonquest.notify.TitleNotifyIO;
 import org.betonquest.betonquest.notify.TotemNotifyIO;
-import org.betonquest.betonquest.objectives.ActionObjective;
-import org.betonquest.betonquest.objectives.ArrowShootObjective;
-import org.betonquest.betonquest.objectives.BlockObjective;
-import org.betonquest.betonquest.objectives.BreedObjective;
-import org.betonquest.betonquest.objectives.BrewObjective;
-import org.betonquest.betonquest.objectives.ChestPutObjective;
-import org.betonquest.betonquest.objectives.CommandObjective;
-import org.betonquest.betonquest.objectives.ConsumeObjective;
-import org.betonquest.betonquest.objectives.CraftingObjective;
-import org.betonquest.betonquest.objectives.DelayObjective;
-import org.betonquest.betonquest.objectives.DieObjective;
-import org.betonquest.betonquest.objectives.EnchantObjective;
-import org.betonquest.betonquest.objectives.EntityInteractObjective;
-import org.betonquest.betonquest.objectives.EquipItemObjective;
-import org.betonquest.betonquest.objectives.ExperienceObjective;
-import org.betonquest.betonquest.objectives.FishObjective;
-import org.betonquest.betonquest.objectives.JumpObjective;
-import org.betonquest.betonquest.objectives.KillPlayerObjective;
-import org.betonquest.betonquest.objectives.LocationObjective;
-import org.betonquest.betonquest.objectives.LoginObjective;
-import org.betonquest.betonquest.objectives.LogoutObjective;
-import org.betonquest.betonquest.objectives.MobKillObjective;
-import org.betonquest.betonquest.objectives.PasswordObjective;
-import org.betonquest.betonquest.objectives.PickupObjective;
-import org.betonquest.betonquest.objectives.ResourcePackObjective;
-import org.betonquest.betonquest.objectives.RespawnObjective;
-import org.betonquest.betonquest.objectives.RideObjective;
-import org.betonquest.betonquest.objectives.ShearObjective;
-import org.betonquest.betonquest.objectives.SmeltingObjective;
-import org.betonquest.betonquest.objectives.StageObjective;
-import org.betonquest.betonquest.objectives.StepObjective;
-import org.betonquest.betonquest.objectives.TameObjective;
-import org.betonquest.betonquest.objectives.VariableObjective;
+import org.betonquest.betonquest.quest.event.ComposedEventFactoryAdapter;
 import org.betonquest.betonquest.quest.event.NullStaticEventFactory;
-import org.betonquest.betonquest.quest.event.burn.BurnEventFactory;
-import org.betonquest.betonquest.quest.event.cancel.CancelEventFactory;
-import org.betonquest.betonquest.quest.event.chat.ChatEventFactory;
-import org.betonquest.betonquest.quest.event.chest.ChestClearEventFactory;
-import org.betonquest.betonquest.quest.event.chest.ChestGiveEventFactory;
-import org.betonquest.betonquest.quest.event.chest.ChestTakeEventFactory;
-import org.betonquest.betonquest.quest.event.command.CommandEventFactory;
-import org.betonquest.betonquest.quest.event.command.OpSudoEventFactory;
-import org.betonquest.betonquest.quest.event.command.SudoEventFactory;
-import org.betonquest.betonquest.quest.event.compass.CompassEventFactory;
-import org.betonquest.betonquest.quest.event.conversation.CancelConversationEventFactory;
-import org.betonquest.betonquest.quest.event.conversation.ConversationEventFactory;
-import org.betonquest.betonquest.quest.event.damage.DamageEventFactory;
-import org.betonquest.betonquest.quest.event.door.DoorEventFactory;
-import org.betonquest.betonquest.quest.event.drop.DropEventFactory;
-import org.betonquest.betonquest.quest.event.effect.DeleteEffectEventFactory;
-import org.betonquest.betonquest.quest.event.effect.EffectEventFactory;
-import org.betonquest.betonquest.quest.event.entity.RemoveEntityEventFactory;
-import org.betonquest.betonquest.quest.event.experience.ExperienceEventFactory;
-import org.betonquest.betonquest.quest.event.explosion.ExplosionEventFactory;
-import org.betonquest.betonquest.quest.event.give.GiveEventFactory;
-import org.betonquest.betonquest.quest.event.hunger.HungerEventFactory;
-import org.betonquest.betonquest.quest.event.item.ItemDurabilityEventFactory;
-import org.betonquest.betonquest.quest.event.journal.GiveJournalEventFactory;
-import org.betonquest.betonquest.quest.event.journal.JournalEventFactory;
-import org.betonquest.betonquest.quest.event.kill.KillEventFactory;
-import org.betonquest.betonquest.quest.event.language.LanguageEventFactory;
 import org.betonquest.betonquest.quest.event.legacy.FromClassQuestEventFactory;
 import org.betonquest.betonquest.quest.event.legacy.QuestEventFactory;
 import org.betonquest.betonquest.quest.event.legacy.QuestEventFactoryAdapter;
-import org.betonquest.betonquest.quest.event.lever.LeverEventFactory;
-import org.betonquest.betonquest.quest.event.lightning.LightningEventFactory;
-import org.betonquest.betonquest.quest.event.log.LogEventFactory;
-import org.betonquest.betonquest.quest.event.logic.FirstEventFactory;
-import org.betonquest.betonquest.quest.event.logic.IfElseEventFactory;
-import org.betonquest.betonquest.quest.event.notify.NotifyAllEventFactory;
-import org.betonquest.betonquest.quest.event.notify.NotifyEventFactory;
-import org.betonquest.betonquest.quest.event.party.PartyEventFactory;
-import org.betonquest.betonquest.quest.event.point.DeleteGlobalPointEventFactory;
-import org.betonquest.betonquest.quest.event.point.DeletePointEventFactory;
-import org.betonquest.betonquest.quest.event.point.GlobalPointEventFactory;
-import org.betonquest.betonquest.quest.event.point.PointEventFactory;
-import org.betonquest.betonquest.quest.event.random.PickRandomEventFactory;
-import org.betonquest.betonquest.quest.event.run.RunForAllEventFactory;
-import org.betonquest.betonquest.quest.event.run.RunIndependentEventFactory;
-import org.betonquest.betonquest.quest.event.scoreboard.ScoreboardEventFactory;
-import org.betonquest.betonquest.quest.event.setblock.SetBlockEventFactory;
-import org.betonquest.betonquest.quest.event.stage.StageEventFactory;
-import org.betonquest.betonquest.quest.event.tag.TagGlobalEventFactory;
-import org.betonquest.betonquest.quest.event.tag.TagPlayerEventFactory;
-import org.betonquest.betonquest.quest.event.teleport.TeleportEventFactory;
-import org.betonquest.betonquest.quest.event.time.TimeEventFactory;
-import org.betonquest.betonquest.quest.event.velocity.VelocityEventFactory;
-import org.betonquest.betonquest.quest.event.weather.WeatherEventFactory;
+import org.betonquest.betonquest.quest.registry.CoreQuestTypes;
+import org.betonquest.betonquest.quest.registry.QuestRegistry;
 import org.betonquest.betonquest.utils.PlayerConverter;
-import org.betonquest.betonquest.variables.ConditionVariable;
-import org.betonquest.betonquest.variables.GlobalPointVariable;
-import org.betonquest.betonquest.variables.GlobalTagVariable;
-import org.betonquest.betonquest.variables.ItemDurabilityVariable;
-import org.betonquest.betonquest.variables.ItemVariable;
-import org.betonquest.betonquest.variables.LocationVariable;
-import org.betonquest.betonquest.variables.MathVariable;
-import org.betonquest.betonquest.variables.NpcNameVariable;
-import org.betonquest.betonquest.variables.ObjectivePropertyVariable;
-import org.betonquest.betonquest.variables.PlayerNameVariable;
-import org.betonquest.betonquest.variables.PointVariable;
-import org.betonquest.betonquest.variables.RandomNumberVariable;
-import org.betonquest.betonquest.variables.TagVariable;
-import org.betonquest.betonquest.variables.VersionVariable;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.ServicePriority;
@@ -287,23 +129,16 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.InstantSource;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Handler;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Represents BetonQuest plugin.
@@ -328,18 +163,6 @@ public class BetonQuest extends JavaPlugin {
 
     private static final Map<String, EventScheduling.ScheduleType<?>> SCHEDULE_TYPES = new HashMap<>();
 
-    private static final Map<ConditionID, Condition> CONDITIONS = new HashMap<>();
-
-    private static final Map<EventID, QuestEvent> EVENTS = new HashMap<>();
-
-    private static final Map<ObjectiveID, Objective> OBJECTIVES = new HashMap<>();
-
-    private static final Map<ConversationID, ConversationData> CONVERSATIONS = new HashMap<>();
-
-    private static final Map<VariableID, Variable> VARIABLES = new HashMap<>();
-
-    private static final Map<QuestCancelerID, QuestCanceler> CANCELERS = new HashMap<>();
-
     /**
      * The indicator for dev versions.
      */
@@ -360,7 +183,12 @@ public class BetonQuest extends JavaPlugin {
      */
     private final Map<String, QuestEventFactory> eventTypes = new HashMap<>();
 
-    private final ConcurrentHashMap<Profile, PlayerData> playerDataMap = new ConcurrentHashMap<>();
+    private final Map<Profile, PlayerData> playerDataMap = new ConcurrentHashMap<>();
+
+    /**
+     * Stores Conditions, Events, Objectives, Variables, Conversations and Cancelers.
+     */
+    private QuestRegistry questRegistry;
 
     private BetonQuestLoggerFactory loggerFactory;
 
@@ -395,11 +223,6 @@ public class BetonQuest extends JavaPlugin {
     private RPGMenu rpgMenu;
 
     /**
-     * Event scheduling module
-     */
-    private EventScheduling eventScheduling;
-
-    /**
      * Cache for event schedulers, holding the last execution of an event
      */
     private LastExecutionCache lastExecutionCache;
@@ -413,6 +236,13 @@ public class BetonQuest extends JavaPlugin {
         return instance;
     }
 
+    /**
+     * Checks if the conditions described by conditionID are met.
+     *
+     * @param profile      the {@link Profile} of the player which should be checked
+     * @param conditionIDs IDs of the conditions to check
+     * @return if all conditions are met
+     */
     public static boolean conditions(final Profile profile, final Collection<ConditionID> conditionIDs) {
         final ConditionID[] ids = new ConditionID[conditionIDs.size()];
         int index = 0;
@@ -422,47 +252,15 @@ public class BetonQuest extends JavaPlugin {
         return conditions(profile, ids);
     }
 
-    @SuppressWarnings("PMD.CognitiveComplexity")
+    /**
+     * Checks if the conditions described by conditionID are met.
+     *
+     * @param profile      the {@link Profile} of the player which should be checked
+     * @param conditionIDs IDs of the conditions to check
+     * @return if all conditions are met
+     */
     public static boolean conditions(@Nullable final Profile profile, final ConditionID... conditionIDs) {
-        if (Bukkit.isPrimaryThread()) {
-            for (final ConditionID id : conditionIDs) {
-                if (!condition(profile, id)) {
-                    return false;
-                }
-            }
-        } else {
-            final List<CompletableFuture<Boolean>> conditions = new ArrayList<>();
-            for (final ConditionID id : conditionIDs) {
-                final CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(
-                        () -> condition(profile, id));
-                conditions.add(future);
-            }
-            for (final CompletableFuture<Boolean> condition : conditions) {
-                try {
-                    if (!condition.get()) {
-                        return false;
-                    }
-                } catch (final InterruptedException | ExecutionException e) {
-                    // Currently conditions that are forced to be sync cause every CompletableFuture.get() call
-                    // to delay the check by one tick.
-                    // If this happens during a shutdown, the check will be delayed past the last tick.
-                    // This will throw a CancellationException and IllegalPluginAccessExceptions.
-                    // For Paper we can detect this and only log it to the debug getInstance().log.
-                    // When the conditions get reworked, this complete check can be removed including the Spigot message.
-                    if (PaperLib.isPaper() && Bukkit.getServer().isStopping()) {
-                        getInstance().log.debug("Exception during shutdown while checking conditions (expected):", e);
-                        return false;
-                    }
-                    if (PaperLib.isSpigot()) {
-                        getInstance().log.warn("The following exception is only ok when the server is currently stopping."
-                                + "Switch to papermc.io to fix this.");
-                    }
-                    getInstance().log.reportException(e);
-                    return false;
-                }
-            }
-        }
-        return true;
+        return instance.questRegistry.conditions().checks(profile, conditionIDs);
     }
 
     /**
@@ -472,34 +270,8 @@ public class BetonQuest extends JavaPlugin {
      * @param profile     the {@link Profile} of the player which should be checked
      * @return if the condition is met
      */
-    @SuppressWarnings("PMD.NPathComplexity")
     public static boolean condition(@Nullable final Profile profile, final ConditionID conditionID) {
-        final Condition condition = CONDITIONS.get(conditionID);
-        if (condition == null) {
-            getInstance().log.warn(conditionID.getPackage(), "The condition " + conditionID + " is not defined!");
-            return false;
-        }
-        if (profile == null && !condition.isStatic()) {
-            getInstance().log.warn(conditionID.getPackage(),
-                    "Cannot check non-static condition '" + conditionID + "' without a player, returning false");
-            return false;
-        }
-        if (profile != null && profile.getOnlineProfile().isEmpty() && !condition.isPersistent()) {
-            getInstance().log.debug(conditionID.getPackage(), "Player was offline, condition is not persistent, returning false");
-            return false;
-        }
-        final boolean outcome;
-        try {
-            outcome = condition.handle(profile);
-        } catch (final QuestRuntimeException e) {
-            getInstance().log.warn(conditionID.getPackage(), "Error while checking '" + conditionID + "' condition: " + e.getMessage(), e);
-            return false;
-        }
-        final boolean isMet = outcome != conditionID.inverted();
-        getInstance().log.debug(conditionID.getPackage(),
-                (isMet ? "TRUE" : "FALSE") + ": " + (conditionID.inverted() ? "inverted" : "") + " condition "
-                        + conditionID + " for " + profile);
-        return isMet;
+        return instance.questRegistry.conditions().check(profile, conditionID);
     }
 
     /**
@@ -511,23 +283,7 @@ public class BetonQuest extends JavaPlugin {
      * @return true if the event was run even if there was an exception during execution
      */
     public static boolean event(@Nullable final Profile profile, final EventID eventID) {
-        final QuestEvent event = EVENTS.get(eventID);
-        if (event == null) {
-            getInstance().log.warn(eventID.getPackage(), "Event " + eventID + " is not defined");
-            return false;
-        }
-        if (profile == null) {
-            getInstance().log.debug(eventID.getPackage(), "Firing event " + eventID + " player independent");
-        } else {
-            getInstance().log.debug(eventID.getPackage(),
-                    "Firing event " + eventID + " for " + profile);
-        }
-        try {
-            return event.fire(profile);
-        } catch (final QuestRuntimeException e) {
-            getInstance().log.warn(eventID.getPackage(), "Error while firing '" + eventID + "' event: " + e.getMessage(), e);
-            return true;
-        }
+        return instance.questRegistry.events().execute(profile, eventID);
     }
 
     /**
@@ -536,14 +292,8 @@ public class BetonQuest extends JavaPlugin {
      * @param profile     the {@link Profile} of the player
      * @param objectiveID ID of the objective
      */
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
     public static void newObjective(final Profile profile, final ObjectiveID objectiveID) {
-        final Objective objective = OBJECTIVES.get(objectiveID);
-        if (objective.containsPlayer(profile)) {
-            getInstance().log.debug(objectiveID.getPackage(), profile + " already has the " + objectiveID + " objective");
-            return;
-        }
-        objective.newPlayer(profile);
+        instance.questRegistry.objectives().start(profile, objectiveID);
     }
 
     /**
@@ -554,17 +304,7 @@ public class BetonQuest extends JavaPlugin {
      * @param instruction data instruction string
      */
     public static void resumeObjective(final Profile profile, final ObjectiveID objectiveID, final String instruction) {
-        final Objective objective = OBJECTIVES.get(objectiveID);
-        if (objective == null) {
-            getInstance().log.warn(objectiveID.getPackage(), "Objective " + objectiveID + " does not exist");
-            return;
-        }
-        if (objective.containsPlayer(profile)) {
-            getInstance().log.debug(objectiveID.getPackage(),
-                    profile + " already has the " + objectiveID + " objective!");
-            return;
-        }
-        objective.resumeObjectiveForPlayer(profile, instruction);
+        instance.questRegistry.objectives().resume(profile, objectiveID, instruction);
     }
 
     /**
@@ -579,64 +319,11 @@ public class BetonQuest extends JavaPlugin {
     @Nullable
     public static Variable createVariable(@Nullable final QuestPackage pack, final String instruction)
             throws InstructionParseException {
-        final VariableID variableID;
-        try {
-            variableID = new VariableID(getInstance().loggerFactory, pack, instruction);
-        } catch (final ObjectNotFoundException e) {
-            throw new InstructionParseException("Could not load variable: " + e.getMessage(), e);
-        }
-        // no need to create duplicated variables
-        final Variable existingVariable = VARIABLES.get(variableID);
-        if (existingVariable != null) {
-            return existingVariable;
-        }
-        final Instruction instructionVar = variableID.generateInstruction();
-        final Class<? extends Variable> variableClass = VARIABLE_TYPES.get(instructionVar.current());
-        // if it's null then there is no such type registered, log an error
-        if (variableClass == null) {
-            throw new InstructionParseException("Variable type " + instructionVar.current() + " is not registered");
-        }
-
-        try {
-            final Variable variable = variableClass.getConstructor(Instruction.class).newInstance(instructionVar);
-            VARIABLES.put(variableID, variable);
-            getInstance().log.debug(pack, "Variable " + variableID + " loaded");
-            return variable;
-        } catch (final InvocationTargetException e) {
-            if (e.getCause() instanceof InstructionParseException) {
-                throw new InstructionParseException("Error in " + variableID + " variable: " + e.getCause().getMessage(), e);
-            } else {
-                getInstance().log.reportException(pack, e);
-            }
-        } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-            getInstance().log.reportException(pack, e);
-        }
-        return null;
+        return instance.questRegistry.variables().create(pack, instruction);
     }
 
     public static boolean isVariableType(final String type) {
         return VARIABLE_TYPES.get(type) != null;
-    }
-
-    /**
-     * Resolves variables in the supplied text and returns them as a list of
-     * instruction strings, including % characters. Variables are unique, so if
-     * the user uses the same variables multiple times, the list will contain
-     * only one occurence of this variable.
-     *
-     * @param text text from which the variables will be resolved
-     * @return the list of unique variable instructions
-     */
-    public static List<String> resolveVariables(final String text) {
-        final List<String> variables = new ArrayList<>();
-        final Matcher matcher = Pattern.compile("%[^ %\\s]+%").matcher(text);
-        while (matcher.find()) {
-            final String variable = matcher.group();
-            if (!variables.contains(variable)) {
-                variables.add(variable);
-            }
-        }
-        return variables;
     }
 
     /**
@@ -648,24 +335,13 @@ public class BetonQuest extends JavaPlugin {
         return NOTIFY_IO_TYPES.get(name);
     }
 
-    private static void loadQuestCanceler() {
-        for (final Entry<String, QuestPackage> entry : Config.getPackages().entrySet()) {
-            final QuestPackage pack = entry.getValue();
-            final ConfigurationSection cancelSection = pack.getConfig().getConfigurationSection("cancel");
-            if (cancelSection != null) {
-                for (final String key : cancelSection.getKeys(false)) {
-                    try {
-                        CANCELERS.put(new QuestCancelerID(pack, key), new QuestCanceler(pack, key));
-                    } catch (final InstructionParseException | ObjectNotFoundException e) {
-                        getInstance().log.warn(pack, "Could not load '" + pack.getQuestPath() + "." + key + "' quest canceler: " + e.getMessage(), e);
-                    }
-                }
-            }
-        }
-    }
-
+    /**
+     * Get the loaded Quest Canceller.
+     *
+     * @return quest cancellers in a new map
+     */
     public static Map<QuestCancelerID, QuestCanceler> getCanceler() {
-        return CANCELERS;
+        return instance.questRegistry.questCanceller().getCancelers();
     }
 
     /**
@@ -725,7 +401,7 @@ public class BetonQuest extends JavaPlugin {
         if (getServer().isPrimaryThread()) {
             getServer().getPluginManager().callEvent(event);
         } else {
-            getServer().getScheduler().runTask(BetonQuest.getInstance(), () -> getServer().getPluginManager().callEvent(event));
+            getServer().getScheduler().runTask(getInstance(), () -> getServer().getPluginManager().callEvent(event));
         }
     }
 
@@ -814,7 +490,6 @@ public class BetonQuest extends JavaPlugin {
 
         new QuestItemHandler();
 
-        eventScheduling = new EventScheduling(loggerFactory.create(EventScheduling.class, "Schedules"), SCHEDULE_TYPES);
         final ConfigAccessor cache;
         try {
             final Path cacheFile = new File(getDataFolder(), CACHE_FILE).toPath();
@@ -846,150 +521,10 @@ public class BetonQuest extends JavaPlugin {
         new CompassCommand();
         new LangCommand(loggerFactory.create(LangCommand.class));
 
-        registerConditions("health", HealthCondition.class);
-        registerConditions("permission", PermissionCondition.class);
-        registerConditions("experience", ExperienceCondition.class);
-        registerConditions("tag", TagCondition.class);
-        registerConditions("globaltag", GlobalTagCondition.class);
-        registerConditions("point", PointCondition.class);
-        registerConditions("globalpoint", GlobalPointCondition.class);
-        registerConditions("and", ConjunctionCondition.class);
-        registerConditions("or", AlternativeCondition.class);
-        registerConditions("time", TimeCondition.class);
-        registerConditions("weather", WeatherCondition.class);
-        registerConditions("height", HeightCondition.class);
-        registerConditions("item", ItemCondition.class);
-        registerConditions("hand", HandCondition.class);
-        registerConditions("language", LanguageCondition.class);
-        registerConditions("location", LocationCondition.class);
-        registerConditions("armor", ArmorCondition.class);
-        registerConditions("effect", EffectCondition.class);
-        registerConditions("rating", ArmorRatingCondition.class);
-        registerConditions("sneak", SneakCondition.class);
-        registerConditions("stage", StageCondition.class);
-        registerConditions("random", RandomCondition.class);
-        registerConditions("journal", JournalCondition.class);
-        registerConditions("testforblock", TestForBlockCondition.class);
-        registerConditions("empty", EmptySlotsCondition.class);
-        registerConditions("party", PartyCondition.class);
-        registerConditions("entities", EntityCondition.class);
-        registerConditions("objective", ObjectiveCondition.class);
-        registerConditions("check", CheckCondition.class);
-        registerConditions("chestitem", ChestItemCondition.class);
-        registerConditions("score", ScoreboardCondition.class);
-        registerConditions("ride", RideCondition.class);
-        registerConditions("world", WorldCondition.class);
-        registerConditions("gamemode", GameModeCondition.class);
-        registerConditions("advancement", AdvancementCondition.class);
-        registerConditions("variable", VariableCondition.class);
-        registerConditions("biome", BiomeCondition.class);
-        registerConditions("dayofweek", DayOfWeekCondition.class);
-        registerConditions("partialdate", PartialDateCondition.class);
-        registerConditions("realtime", RealTimeCondition.class);
-        registerConditions("looking", LookingAtCondition.class);
-        registerConditions("facing", FacingCondition.class);
-        registerConditions("conversation", ConversationCondition.class);
-        registerConditions("mooncycle", MooncycleCondition.class);
-        registerConditions("fly", FlyingCondition.class);
-        registerConditions("burning", BurningCondition.class);
-        registerConditions("inconversation", InConversationCondition.class);
-        registerConditions("hunger", HungerCondition.class);
-        registerConditions("itemdurability", ItemDurabilityCondition.class);
-        registerConditions("numbercompare", NumberCompareCondition.class);
+        questRegistry = new QuestRegistry(loggerFactory.create(QuestRegistry.class), loggerFactory, this,
+                SCHEDULE_TYPES, CONDITION_TYPES, eventTypes, OBJECTIVE_TYPES, VARIABLE_TYPES);
 
-        registerEvents("objective", ObjectiveEvent.class);
-        registerEvent("command", new CommandEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("compass", new CompassEventFactory(loggerFactory, this, getServer().getPluginManager(), getServer(), getServer().getScheduler()));
-        registerEvent("tag", new TagPlayerEventFactory(this, getSaver()));
-        registerEvent("globaltag", new TagGlobalEventFactory(this));
-        registerEvent("journal", new JournalEventFactory(loggerFactory, this, InstantSource.system(), getSaver()));
-        registerNonStaticEvent("teleport", new TeleportEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerEvent("explosion", new ExplosionEventFactory(getServer(), getServer().getScheduler(), this));
-        registerEvent("lightning", new LightningEventFactory(getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("point", new PointEventFactory(loggerFactory));
-        registerEvent("globalpoint", new GlobalPointEventFactory());
-        registerNonStaticEvent("give", new GiveEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerEvents("take", TakeEvent.class);
-        registerNonStaticEvent("conversation", new ConversationEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("kill", new KillEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("effect", new EffectEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("deleffect", new DeleteEffectEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerEvent("deletepoint", new DeletePointEventFactory());
-        registerEvents("spawn", SpawnMobEvent.class);
-        registerEvent("removeentity", new RemoveEntityEventFactory(getServer(), getServer().getScheduler(), this));
-        registerEvent("time", new TimeEventFactory(getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("weather", new WeatherEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerEvents("folder", FolderEvent.class);
-        registerEvent("setblock", new SetBlockEventFactory(getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("stage", new StageEventFactory(this));
-        registerNonStaticEvent("damage", new DamageEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("party", new PartyEventFactory(loggerFactory));
-        registerEvents("run", RunEvent.class);
-        registerNonStaticEvent("givejournal", new GiveJournalEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("sudo", new SudoEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("opsudo", new OpSudoEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerEvent("chestgive", new ChestGiveEventFactory(getServer(), getServer().getScheduler(), this));
-        registerEvent("chesttake", new ChestTakeEventFactory(getServer(), getServer().getScheduler(), this));
-        registerEvent("chestclear", new ChestClearEventFactory(getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("cancel", new CancelEventFactory(loggerFactory));
-        registerNonStaticEvent("score", new ScoreboardEventFactory(getServer(), getServer().getScheduler(), this));
-        registerEvent("lever", new LeverEventFactory(getServer(), getServer().getScheduler(), this));
-        registerEvent("door", new DoorEventFactory(getServer(), getServer().getScheduler(), this));
-        registerEvent("if", new IfElseEventFactory());
-        registerEvent("first", new FirstEventFactory());
-        registerEvents("variable", VariableEvent.class);
-        registerNonStaticEvent("language", new LanguageEventFactory(this));
-        registerEvent("pickrandom", new PickRandomEventFactory());
-        registerNonStaticEvent("experience", new ExperienceEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("notify", new NotifyEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerEvent("notifyall", new NotifyAllEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("chat", new ChatEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("burn", new BurnEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("velocity", new VelocityEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("hunger", new HungerEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("cancelconversation", new CancelConversationEventFactory(loggerFactory));
-        registerEvent("deleteglobalpoint", new DeleteGlobalPointEventFactory());
-        registerEvent("drop", new DropEventFactory(getServer(), getServer().getScheduler(), this));
-        registerNonStaticEvent("itemdurability", new ItemDurabilityEventFactory(loggerFactory, getServer(), getServer().getScheduler(), this));
-        registerEvent("log", new LogEventFactory(loggerFactory));
-        registerEvent("runForAll", new RunForAllEventFactory());
-        registerEvent("runIndependent", new RunIndependentEventFactory());
-
-        registerObjectives("location", LocationObjective.class);
-        registerObjectives("block", BlockObjective.class);
-        registerObjectives("mobkill", MobKillObjective.class);
-        registerObjectives("action", ActionObjective.class);
-        registerObjectives("die", DieObjective.class);
-        registerObjectives("craft", CraftingObjective.class);
-        registerObjectives("smelt", SmeltingObjective.class);
-        registerObjectives("tame", TameObjective.class);
-        registerObjectives("delay", DelayObjective.class);
-        registerObjectives("arrow", ArrowShootObjective.class);
-        registerObjectives("experience", ExperienceObjective.class);
-        registerObjectives("step", StepObjective.class);
-        registerObjectives("stage", StageObjective.class);
-        registerObjectives("logout", LogoutObjective.class);
-        registerObjectives("login", LoginObjective.class);
-        registerObjectives("password", PasswordObjective.class);
-        registerObjectives("pickup", PickupObjective.class);
-        registerObjectives("fish", FishObjective.class);
-        registerObjectives("enchant", EnchantObjective.class);
-        registerObjectives("shear", ShearObjective.class);
-        registerObjectives("chestput", ChestPutObjective.class);
-        registerObjectives("brew", BrewObjective.class);
-        registerObjectives("ride", RideObjective.class);
-        registerObjectives("consume", ConsumeObjective.class);
-        registerObjectives("variable", VariableObjective.class);
-        registerObjectives("kill", KillPlayerObjective.class);
-        registerObjectives("interact", EntityInteractObjective.class);
-        registerObjectives("resourcepack", ResourcePackObjective.class);
-        registerObjectives("respawn", RespawnObjective.class);
-        registerObjectives("breed", BreedObjective.class);
-        registerObjectives("command", CommandObjective.class);
-        if (PaperLib.isPaper()) {
-            registerObjectives("jump", JumpObjective.class);
-            registerObjectives("equip", EquipItemObjective.class);
-        }
+        new CoreQuestTypes(loggerFactory, getServer(), getServer().getScheduler(), this).register();
 
         registerConversationIO("simple", SimpleConvIO.class);
         registerConversationIO("tellraw", TellrawConvIO.class);
@@ -1010,21 +545,6 @@ public class BetonQuest extends JavaPlugin {
         registerNotifyIO("totem", TotemNotifyIO.class);
         registerNotifyIO("subtitle", SubTitleNotifyIO.class);
         registerNotifyIO("sound", SoundIO.class);
-
-        registerVariable("condition", ConditionVariable.class);
-        registerVariable("tag", TagVariable.class);
-        registerVariable("globaltag", GlobalTagVariable.class);
-        registerVariable("player", PlayerNameVariable.class);
-        registerVariable("npc", NpcNameVariable.class);
-        registerVariable("objective", ObjectivePropertyVariable.class);
-        registerVariable("point", PointVariable.class);
-        registerVariable("globalpoint", GlobalPointVariable.class);
-        registerVariable("item", ItemVariable.class);
-        registerVariable("version", VersionVariable.class);
-        registerVariable("location", LocationVariable.class);
-        registerVariable("math", MathVariable.class);
-        registerVariable("randomnumber", RandomNumberVariable.class);
-        registerVariable("itemdurability", ItemDurabilityVariable.class);
 
         registerScheduleType("realtime-daily", RealtimeDailySchedule.class, new RealtimeDailyScheduler(loggerFactory.create(RealtimeDailyScheduler.class, "Schedules"), lastExecutionCache));
         registerScheduleType("realtime-cron", RealtimeCronSchedule.class, new RealtimeCronScheduler(loggerFactory.create(RealtimeCronScheduler.class, "Schedules"), lastExecutionCache));
@@ -1063,12 +583,7 @@ public class BetonQuest extends JavaPlugin {
             getInstance().log.warn("Could not disable /betonquestanswer logging", e);
         }
 
-        final Map<String, InstructionMetricsSupplier<? extends ID>> metricsSuppliers = new HashMap<>();
-        metricsSuppliers.put("conditions", new CompositeInstructionMetricsSupplier<>(CONDITIONS::keySet, CONDITION_TYPES::keySet));
-        metricsSuppliers.put("events", new CompositeInstructionMetricsSupplier<>(EVENTS::keySet, eventTypes::keySet));
-        metricsSuppliers.put("objectives", new CompositeInstructionMetricsSupplier<>(OBJECTIVES::keySet, OBJECTIVE_TYPES::keySet));
-        metricsSuppliers.put("variables", new CompositeInstructionMetricsSupplier<>(VARIABLES::keySet, VARIABLE_TYPES::keySet));
-        new BStatsMetrics(this, new Metrics(this, BSTATS_METRICS_ID), metricsSuppliers);
+        new BStatsMetrics(this, new Metrics(this, BSTATS_METRICS_ID), questRegistry.metricsSupplier());
 
         setupUpdater();
 
@@ -1118,199 +633,17 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Loads events and conditions to the maps
+     * Loads QuestPackages and refreshes player objectives.
+     *
+     * @see QuestRegistry#loadData(Collection)
      */
-    @SuppressWarnings({"PMD.NcssCount", "PMD.NPathComplexity", "PMD.CognitiveComplexity"})
     public void loadData() {
-        eventScheduling.stopAll();
+        instance.questRegistry.loadData(Config.getPackages().values());
 
-        // save data of all objectives to the players
-        for (final Objective objective : OBJECTIVES.values()) {
-            objective.close();
-        }
-        // clear previously loaded data
-        EVENTS.clear();
-        CONDITIONS.clear();
-        CONVERSATIONS.clear();
-        OBJECTIVES.clear();
-        VARIABLES.clear();
-        CANCELERS.clear();
-
-        loadQuestCanceler();
-
-        // load new data
-        for (final QuestPackage pack : Config.getPackages().values()) {
-            final String packName = pack.getQuestPath();
-            getInstance().log.debug(pack, "Loading stuff in package " + packName);
-            final ConfigurationSection eConfig = Config.getPackages().get(packName).getConfig().getConfigurationSection("events");
-            if (eConfig != null) {
-                for (final String key : eConfig.getKeys(false)) {
-                    if (key.contains(" ")) {
-                        getInstance().log.warn(pack,
-                                "Event name cannot contain spaces: '" + key + "' (in " + packName + " package)");
-                        continue;
-                    }
-                    final EventID identifier;
-                    try {
-                        identifier = new EventID(pack, key);
-                    } catch (final ObjectNotFoundException e) {
-                        getInstance().log.warn(pack, "Error while loading event '" + packName + "." + key + "': " + e.getMessage(), e);
-                        continue;
-                    }
-                    final String type;
-                    try {
-                        type = identifier.generateInstruction().getPart(0);
-                    } catch (final InstructionParseException e) {
-                        getInstance().log.warn(pack, "Objective type not defined in '" + packName + "." + key + "'", e);
-                        continue;
-                    }
-                    final QuestEventFactory eventFactory = getEventFactory(type);
-                    if (eventFactory == null) {
-                        // if it's null then there is no such type registered, log an error
-                        getInstance().log.warn(pack, "Event type " + type + " is not registered, check if it's"
-                                + " spelled correctly in '" + identifier + "' event.");
-                        continue;
-                    }
-
-                    try {
-                        final QuestEvent event = eventFactory.parseEventInstruction(identifier.generateInstruction());
-                        EVENTS.put(identifier, event);
-                        getInstance().log.debug(pack, "  Event '" + identifier + "' loaded");
-                    } catch (final InstructionParseException e) {
-                        getInstance().log.warn(pack, "Error in '" + identifier + "' event (" + type + "): " + e.getMessage(), e);
-                    }
-                }
-            }
-            final ConfigurationSection cConfig = pack.getConfig().getConfigurationSection("conditions");
-            if (cConfig != null) {
-                for (final String key : cConfig.getKeys(false)) {
-                    if (key.contains(" ")) {
-                        getInstance().log.warn(pack,
-                                "Condition name cannot contain spaces: '" + key + "' (in " + packName + " package)");
-                        continue;
-                    }
-                    final ConditionID identifier;
-                    try {
-                        identifier = new ConditionID(pack, key);
-                    } catch (final ObjectNotFoundException e) {
-                        getInstance().log.warn(pack, "Error while loading condition '" + packName + "." + key + "': " + e.getMessage(), e);
-                        continue;
-                    }
-                    final String type;
-                    try {
-                        type = identifier.generateInstruction().getPart(0);
-                    } catch (final InstructionParseException e) {
-                        getInstance().log.warn(pack, "Condition type not defined in '" + packName + "." + key + "'", e);
-                        continue;
-                    }
-                    final Class<? extends Condition> conditionClass = CONDITION_TYPES.get(type);
-                    // if it's null then there is no such type registered, log an
-                    // error
-                    if (conditionClass == null) {
-                        getInstance().log.warn(pack, "Condition type " + type + " is not registered,"
-                                + " check if it's spelled correctly in '" + identifier + "' condition.");
-                        continue;
-                    }
-                    try {
-                        final Condition condition = conditionClass.getConstructor(Instruction.class)
-                                .newInstance(identifier.generateInstruction());
-                        CONDITIONS.put(identifier, condition);
-                        getInstance().log.debug(pack, "  Condition '" + identifier + "' loaded");
-                    } catch (final InvocationTargetException e) {
-                        if (e.getCause() instanceof InstructionParseException) {
-                            getInstance().log.warn(pack, "Error in '" + identifier + "' condition (" + type + "): " + e.getCause().getMessage(), e);
-                        } else {
-                            getInstance().log.reportException(pack, e);
-                        }
-                    } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-                        getInstance().log.reportException(pack, e);
-                    }
-                }
-            }
-            final ConfigurationSection oConfig = pack.getConfig().getConfigurationSection("objectives");
-            if (oConfig != null) {
-                for (final String key : oConfig.getKeys(false)) {
-                    if (key.contains(" ")) {
-                        getInstance().log.warn(pack,
-                                "Objective name cannot contain spaces: '" + key + "' (in " + packName + " package)");
-                        continue;
-                    }
-                    final ObjectiveID identifier;
-                    try {
-                        identifier = new ObjectiveID(pack, key);
-                    } catch (final ObjectNotFoundException e) {
-                        getInstance().log.warn(pack, "Error while loading objective '" + packName + "." + key + "': " + e.getMessage(), e);
-                        continue;
-                    }
-                    final String type;
-                    try {
-                        type = identifier.generateInstruction().getPart(0);
-                    } catch (final InstructionParseException e) {
-                        getInstance().log.warn(pack, "Objective type not defined in '" + packName + "." + key + "'", e);
-                        continue;
-                    }
-                    final Class<? extends Objective> objectiveClass = OBJECTIVE_TYPES.get(type);
-                    // if it's null then there is no such type registered, log an
-                    // error
-                    if (objectiveClass == null) {
-                        getInstance().log.warn(pack,
-                                "Objective type " + type + " is not registered, check if it's"
-                                        + " spelled correctly in '" + identifier + "' objective.");
-                        continue;
-                    }
-                    try {
-                        final Objective objective = objectiveClass.getConstructor(Instruction.class)
-                                .newInstance(identifier.generateInstruction());
-                        OBJECTIVES.put(identifier, objective);
-                        getInstance().log.debug(pack, "  Objective '" + identifier + "' loaded");
-                    } catch (final InvocationTargetException e) {
-                        if (e.getCause() instanceof InstructionParseException) {
-                            getInstance().log.warn(pack, "Error in '" + identifier + "' objective (" + type + "): " + e.getCause().getMessage(), e);
-                        } else {
-                            getInstance().log.reportException(pack, e);
-                        }
-                    } catch (final NoSuchMethodException | InstantiationException | IllegalAccessException e) {
-                        log.reportException(pack, e);
-                    }
-                }
-            }
-            final ConfigurationSection conversationsConfig = pack.getConfig().getConfigurationSection("conversations");
-            if (conversationsConfig != null) {
-                for (final String convName : conversationsConfig.getKeys(false)) {
-                    try {
-                        final ConversationID convID = new ConversationID(pack, convName);
-                        CONVERSATIONS.put(convID, new ConversationData(this, convID, conversationsConfig.getConfigurationSection(convName)));
-                    } catch (final InstructionParseException | ObjectNotFoundException e) {
-                        log.warn(pack, "Error in '" + packName + "." + convName + "' conversation: " + e.getMessage(), e);
-                    }
-                }
-            }
-            // load schedules
-            eventScheduling.loadData(pack);
-
-            getInstance().log.debug(pack, "Everything in package " + packName + " loaded");
-        }
-
-        CONVERSATIONS.entrySet().removeIf(entry -> {
-            final ConversationData convData = entry.getValue();
-            try {
-                convData.checkExternalPointers();
-            } catch (final ObjectNotFoundException e) {
-                log.warn(convData.getPack(), "Error in '" + convData.getPack().getQuestPath() + "." + convData.getName() + "' conversation: " + e.getMessage(), e);
-                return true;
-            }
-            return false;
-        });
-
-        getInstance().log.info("There are " + CONDITIONS.size() + " conditions, " + EVENTS.size() + " events, "
-                + OBJECTIVES.size() + " objectives and " + CONVERSATIONS.size() + " conversations loaded from "
-                + Config.getPackages().size() + " packages.");
         // start those freshly loaded objectives for all players
         for (final PlayerData playerData : playerDataMap.values()) {
             playerData.startObjectives();
         }
-        //start all schedules
-        eventScheduling.startAll();
 
         rpgMenu.reloadData();
 
@@ -1333,7 +666,7 @@ public class BetonQuest extends JavaPlugin {
         lastExecutionCache.reload();
 
         // reload updater settings
-        BetonQuest.getInstance().getUpdater().search();
+        getInstance().getUpdater().search();
         // stop current global locations listener
         // and start new one with reloaded configs
         getInstance().log.debug("Restarting global locations");
@@ -1364,8 +697,8 @@ public class BetonQuest extends JavaPlugin {
     @Override
     public void onDisable() {
         //stop all schedules
-        if (eventScheduling != null) {
-            eventScheduling.stopAll();
+        if (questRegistry != null) {
+            questRegistry.stopAllEventSchedules();
         }
         // suspend all conversations
         for (final OnlineProfile onlineProfile : PlayerConverter.getOnlineProfiles()) {
@@ -1564,6 +897,19 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
+     * Registers an event with its name and a single factory to create both normal and
+     * static instances of the event.
+     *
+     * @param name         name of the event
+     * @param eventFactory factory to create the event and the static event
+     */
+    public void registerEvent(final String name, final ComposedEventFactory eventFactory) {
+        final ComposedEventFactoryAdapter adapter = new ComposedEventFactoryAdapter(eventFactory);
+        getInstance().log.debug("Registering " + name + " event type");
+        eventTypes.put(name, new QuestEventFactoryAdapter(adapter, adapter));
+    }
+
+    /**
      * Registers new objective classes by their names
      *
      * @param name           name of the objective type
@@ -1637,22 +983,20 @@ public class BetonQuest extends JavaPlugin {
      * @return list of this player's active objectives
      */
     public List<Objective> getPlayerObjectives(final Profile profile) {
-        final List<Objective> list = new ArrayList<>();
-        for (final Objective objective : OBJECTIVES.values()) {
-            if (objective.containsPlayer(profile)) {
-                list.add(objective);
-            }
-        }
-        return list;
+        return questRegistry.objectives().getActive(profile);
     }
 
     /**
+     * Gets stored Conversation Data.
+     * <p>
+     * The conversation data can be null if there was an error loading it.
+     *
      * @param conversationID package name, dot and name of the conversation
      * @return ConversationData object for this conversation or null if it does
      * not exist
      */
     public ConversationData getConversation(final ConversationID conversationID) {
-        return CONVERSATIONS.get(conversationID);
+        return instance.questRegistry.conversations().getConversation(conversationID);
     }
 
     /**
@@ -1661,7 +1005,7 @@ public class BetonQuest extends JavaPlugin {
      */
     @Nullable
     public Objective getObjective(final ObjectiveID objectiveID) {
-        return OBJECTIVES.get(objectiveID);
+        return instance.questRegistry.objectives().getObjective(objectiveID);
     }
 
     /**
@@ -1693,7 +1037,7 @@ public class BetonQuest extends JavaPlugin {
 
     /**
      * Resoles the variable for specified player. If the variable is not loaded
-     * yet it will load it on the main thread.
+     * it will load it on the main thread.
      *
      * @param packName name of the package
      * @param name     name of the variable (instruction, with % characters)
@@ -1701,26 +1045,7 @@ public class BetonQuest extends JavaPlugin {
      * @return the value of this variable for given player
      */
     public String getVariableValue(final String packName, final String name, @Nullable final Profile profile) {
-        if (!Config.getPackages().containsKey(packName)) {
-            getInstance().log.warn("Variable '" + name + "' contains the non-existent package '" + packName + "' !");
-            return "";
-        }
-        final QuestPackage pack = Config.getPackages().get(packName);
-        try {
-            final Variable var = createVariable(pack, name);
-            if (var == null) {
-                getInstance().log.warn(pack, "Could not resolve variable '" + name + "'.");
-                return "";
-            }
-            if (profile == null && !var.isStaticness()) {
-                getInstance().log.warn(pack, "Variable '" + name + "' cannot be executed without a profile reference!");
-                return "";
-            }
-            return var.getValue(profile);
-        } catch (final InstructionParseException e) {
-            getInstance().log.warn(pack, "&cCould not create variable '" + name + "': " + e.getMessage(), e);
-            return "";
-        }
+        return questRegistry.variables().getValue(packName, name, profile);
     }
 
     /**
@@ -1750,11 +1075,7 @@ public class BetonQuest extends JavaPlugin {
      * @param rename the name it should have now
      */
     public void renameObjective(final ObjectiveID name, final ObjectiveID rename) {
-        final Objective objective = OBJECTIVES.remove(name);
-        OBJECTIVES.put(rename, objective);
-        if (objective != null) {
-            objective.setLabel(rename);
-        }
+        questRegistry.objectives().renameObjective(name, rename);
     }
 
     /**
