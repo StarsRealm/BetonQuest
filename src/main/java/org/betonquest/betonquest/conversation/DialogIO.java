@@ -52,10 +52,10 @@ public class DialogIO implements ConversationIO {
     @Override
     public void addPlayerOption(final String option) {
         final NpcDialogueButton button = new NpcDialogueButton();
-        button.mode(NpcDialogueButton.ButtonMode.BUTTON_MODE);
-        button.text(option);
-        button.commands(new ArrayList<>());
-        button.hasNextForm(true);
+        button.setMode(NpcDialogueButton.ButtonMode.BUTTON_MODE);
+        button.setText(option);
+        button.setCommands(new ArrayList<>());
+        button.setHasNextForm(true);
         npcDialogueForm.buttons().add(button);
     }
 

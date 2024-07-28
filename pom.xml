@@ -66,9 +66,9 @@
     <dependency>
       <groupId>com.starsrealm.starock</groupId>
       <artifactId>plugin</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
+      <version>1.5.0-SNAPSHOT</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/libs/Starock-1.3.0-SNAPSHOT.jar</systemPath>
+      <systemPath>${project.basedir}/libs/Starock-Plugin-1.5.0-SNAPSHOT-dev-all.jar</systemPath>
     </dependency>
     <!-- from enginehub repository -->
     <dependency>
