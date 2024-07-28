@@ -2,10 +2,10 @@ package org.betonquest.betonquest.quest.event.chest;
 
 import org.betonquest.betonquest.Instruction.Item;
 import org.betonquest.betonquest.api.profiles.Profile;
-import org.betonquest.betonquest.api.quest.event.ComposedEvent;
+import org.betonquest.betonquest.api.quest.event.nullable.NullableEvent;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.item.QuestItem;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Puts the items in the inventory of a block or drops them if the inventory is full.
  */
-public class ChestGiveEvent implements ComposedEvent {
+public class ChestGiveEvent implements NullableEvent {
     /**
      * The items to put in the blocks inventory.
      */
@@ -28,7 +28,7 @@ public class ChestGiveEvent implements ComposedEvent {
     /**
      * The location of the block.
      */
-    private final CompoundLocation location;
+    private final VariableLocation location;
 
     /**
      * Create the chest give event.
@@ -36,14 +36,14 @@ public class ChestGiveEvent implements ComposedEvent {
      * @param questItems the items to put in the blocks inventory
      * @param location   the location of the block
      */
-    public ChestGiveEvent(final CompoundLocation location, final Item... questItems) {
+    public ChestGiveEvent(final VariableLocation location, final Item... questItems) {
         this.questItems = Arrays.copyOf(questItems, questItems.length);
         this.location = location;
     }
 
     @Override
     public void execute(@Nullable final Profile profile) throws QuestRuntimeException {
-        final Block block = location.getLocation(profile).getBlock();
+        final Block block = location.getValue(profile).getBlock();
         final InventoryHolder chest;
         try {
             chest = (InventoryHolder) block.getState();
@@ -63,11 +63,11 @@ public class ChestGiveEvent implements ComposedEvent {
      * @param profile the profile of the player
      * @return the item stacks
      */
-    private ItemStack[] getItemStacks(final Profile profile) {
+    private ItemStack[] getItemStacks(@Nullable final Profile profile) throws QuestRuntimeException {
         final List<ItemStack> itemStacks = new ArrayList<>();
-        Arrays.stream(questItems).toList().forEach(item -> {
+        for (final Item item : questItems) {
             final QuestItem questItem = item.getItem();
-            int amount = item.getAmount().getInt(profile);
+            int amount = item.getAmount().getValue(profile).intValue();
             while (amount > 0) {
                 final ItemStack itemStackTemplate = questItem.generate(1, profile);
                 final int stackSize = Math.min(amount, itemStackTemplate.getMaxStackSize());
@@ -75,7 +75,7 @@ public class ChestGiveEvent implements ComposedEvent {
                 itemStacks.add(itemStack);
                 amount = amount - stackSize;
             }
-        });
+        }
         return itemStacks.toArray(ItemStack[]::new);
     }
 }

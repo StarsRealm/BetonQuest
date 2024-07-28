@@ -3,16 +3,16 @@ package org.betonquest.betonquest.events;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
 import org.betonquest.betonquest.Instruction.Item;
-import org.betonquest.betonquest.VariableNumber;
-import org.betonquest.betonquest.VariableString;
 import org.betonquest.betonquest.api.QuestEvent;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
 import org.betonquest.betonquest.id.ItemID;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
+import org.betonquest.betonquest.instruction.variable.VariableString;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.item.QuestItem;
 import org.betonquest.betonquest.utils.Utils;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -29,7 +29,7 @@ import java.util.Locale;
  */
 @SuppressWarnings("PMD.CommentRequired")
 public class SpawnMobEvent extends QuestEvent {
-    private final CompoundLocation loc;
+    private final VariableLocation loc;
 
     private final EntityType type;
 
@@ -100,8 +100,8 @@ public class SpawnMobEvent extends QuestEvent {
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.CognitiveComplexity"})
     @Override
     protected Void execute(@Nullable final Profile profile) throws QuestRuntimeException {
-        final Location location = loc.getLocation(profile);
-        final int pAmount = amount.getInt(profile);
+        final Location location = loc.getValue(profile);
+        final int pAmount = amount.getValue(profile).intValue();
         for (int i = 0; i < pAmount; i++) {
             final Entity entity = location.getWorld().spawnEntity(location, type);
             if (entity instanceof final LivingEntity living) {

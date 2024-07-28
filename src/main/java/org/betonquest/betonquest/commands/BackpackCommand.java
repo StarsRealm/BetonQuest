@@ -1,6 +1,5 @@
 package org.betonquest.betonquest.commands;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.Backpack;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.api.logger.BetonQuestLogger;
@@ -23,8 +22,9 @@ public class BackpackCommand implements CommandExecutor {
 
     /**
      * Registers a new executor of the /backpack command
+     *
+     * @param log the logger that will be used for logging
      */
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public BackpackCommand(final BetonQuestLogger log) {
         this.log = log;
         BetonQuest.getInstance().getCommand("backpack").setExecutor(this);

@@ -5,6 +5,7 @@ import org.betonquest.betonquest.Instruction;
 import org.betonquest.betonquest.api.CountingObjective;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
 import org.betonquest.betonquest.item.QuestItem;
 import org.betonquest.betonquest.utils.PlayerConverter;
 import org.bukkit.Bukkit;
@@ -33,10 +34,9 @@ public class EnchantObjective extends CountingObjective implements Listener {
 
     public EnchantObjective(final Instruction instruction) throws InstructionParseException {
         super(instruction, "items_to_enchant");
-        targetAmount = instruction.getVarNum(instruction.getOptional("amount", "1"));
-        preCheckAmountNotLessThanOne(targetAmount);
+        targetAmount = instruction.getVarNum(instruction.getOptional("amount", "1"), VariableNumber.NOT_LESS_THAN_ONE_CHECKER);
         item = instruction.getQuestItem();
-        desiredEnchantments = instruction.getList(EnchantmentData::convert);
+        desiredEnchantments = instruction.getList(string -> string != null ? EnchantmentData.convert(string) : null);
         if (desiredEnchantments.isEmpty()) {
             throw new InstructionParseException("No enchantments were given! You must specify at least one enchantment.");
         }

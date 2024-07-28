@@ -32,6 +32,7 @@ public class SQLite extends Database {
     /**
      * Creates a new SQLite instance
      *
+     * @param log        the logger that will be used for logging
      * @param plugin     Plugin instance
      * @param dbLocation Location of the Database (Must end in .db)
      */
@@ -44,13 +45,15 @@ public class SQLite extends Database {
     @Override
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     public Connection openConnection() {
-        if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdirs();
+        if (!plugin.getDataFolder().exists() && !plugin.getDataFolder().mkdirs()) {
+            log.error("Unable to create plugin data folder!");
         }
         final File file = new File(plugin.getDataFolder(), dbLocation);
         if (!file.exists()) {
             try {
-                file.createNewFile();
+                if (!file.createNewFile()) {
+                    log.error("Unable to create database file!");
+                }
             } catch (final IOException e) {
                 log.error("Unable to create database!", e);
             }
@@ -62,6 +65,9 @@ public class SQLite extends Database {
                     .getConnection("jdbc:sqlite:" + plugin.getDataFolder().toPath() + "/" + dbLocation);
         } catch (ClassNotFoundException | SQLException e) {
             log.error("There was an exception with SQL", e);
+        }
+        if (connection == null) {
+            throw new IllegalStateException("Not able to create a database connection!");
         }
         return connection;
     }

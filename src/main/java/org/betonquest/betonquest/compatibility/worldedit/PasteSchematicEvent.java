@@ -12,7 +12,6 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.session.ClipboardHolder;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
 import org.betonquest.betonquest.api.QuestEvent;
@@ -20,7 +19,7 @@ import org.betonquest.betonquest.api.logger.BetonQuestLogger;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
@@ -38,13 +37,12 @@ public class PasteSchematicEvent extends QuestEvent {
      */
     private final BetonQuestLogger log;
 
-    private final CompoundLocation loc;
+    private final VariableLocation loc;
 
     private final boolean noAir;
 
     private final File file;
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public PasteSchematicEvent(final Instruction instruction) throws InstructionParseException {
         super(instruction, true);
         this.log = BetonQuest.getInstance().getLoggerFactory().create(getClass());
@@ -73,7 +71,7 @@ public class PasteSchematicEvent extends QuestEvent {
     protected Void execute(final Profile profile) throws QuestRuntimeException {
         try {
             final Clipboard clipboard = getClipboard();
-            final Location location = loc.getLocation(profile);
+            final Location location = loc.getValue(profile);
 
             try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder().maxBlocks(-1).world(BukkitAdapter.adapt(location.getWorld())).build()) {
                 final Operation operation = new ClipboardHolder(clipboard)
@@ -100,5 +98,4 @@ public class PasteSchematicEvent extends QuestEvent {
             return reader.read();
         }
     }
-
 }

@@ -8,16 +8,15 @@ import org.betonquest.betonquest.api.logger.BetonQuestLogger;
 import org.betonquest.betonquest.api.logger.BetonQuestLoggerFactory;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.api.profiles.Profile;
-import org.betonquest.betonquest.api.quest.event.Event;
 import org.betonquest.betonquest.conditions.ChestItemCondition;
 import org.betonquest.betonquest.config.Config;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.ObjectNotFoundException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
 import org.betonquest.betonquest.id.NoID;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.quest.event.chest.ChestTakeEvent;
 import org.betonquest.betonquest.utils.PlayerConverter;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -49,9 +48,9 @@ public class ChestPutObjective extends Objective implements Listener {
     private final Condition chestItemCondition;
 
     @Nullable
-    private final Event chestTakeEvent;
+    private final ChestTakeEvent chestTakeEvent;
 
-    private final CompoundLocation loc;
+    private final VariableLocation loc;
 
     /**
      * Argument to manage the chest access for one or multiple players. False by default which means only one player
@@ -100,7 +99,7 @@ public class ChestPutObjective extends Objective implements Listener {
     }
 
     /**
-     * Checks if there is no other player that has this inventory open
+     * Checks if there is no other player that has this inventory open.
      *
      * @param event InventoryOpenEvent
      * @return true, if no other player using the inventory, else false
@@ -120,7 +119,7 @@ public class ChestPutObjective extends Objective implements Listener {
             return;
         }
         try {
-            final Location targetLocation = loc.getLocation(onlineProfile);
+            final Location targetLocation = loc.getValue(onlineProfile);
             if (isNotInventory(targetLocation)) {
                 return;
             }

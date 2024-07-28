@@ -1,17 +1,16 @@
 package org.betonquest.betonquest.objectives;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.Objective;
 import org.betonquest.betonquest.api.logger.BetonQuestLogger;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.utils.PlayerConverter;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -33,7 +32,7 @@ public class ArrowShootObjective extends Objective implements Listener {
      */
     private final BetonQuestLogger log;
 
-    private final CompoundLocation loc;
+    private final VariableLocation loc;
 
     private final VariableNumber range;
 
@@ -44,7 +43,6 @@ public class ArrowShootObjective extends Objective implements Listener {
         range = instruction.getVarNum();
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @EventHandler(ignoreCancelled = true)
     public void onArrowHit(final ProjectileHitEvent event) {
         // check if it's the arrow shot by the player with active objectve
@@ -60,12 +58,11 @@ public class ArrowShootObjective extends Objective implements Listener {
             return;
         }
         try {
-            final Location location = loc.getLocation(onlineProfile);
+            final Location location = loc.getValue(onlineProfile);
             // check if the arrow is in the right place in the next tick
             // wait one tick, let the arrow land completely
             new BukkitRunnable() {
                 @Override
-                @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
                 public void run() {
                     final Location arrowLocation = arrow.getLocation();
                     final double pRange = range.getDouble(onlineProfile);
@@ -100,5 +97,4 @@ public class ArrowShootObjective extends Objective implements Listener {
     public String getProperty(final String name, final Profile profile) {
         return "";
     }
-
 }

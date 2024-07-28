@@ -1,13 +1,13 @@
 package org.betonquest.betonquest.objectives;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableString;
 import org.betonquest.betonquest.api.CountingObjective;
 import org.betonquest.betonquest.api.MobKillNotifier.MobKilledEvent;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
+import org.betonquest.betonquest.instruction.variable.VariableString;
 import org.betonquest.betonquest.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -38,8 +38,7 @@ public class MobKillObjective extends CountingObjective implements Listener {
     public MobKillObjective(final Instruction instruction) throws InstructionParseException {
         super(instruction, "mobs_to_kill");
         entities = instruction.getList(mob -> instruction.getEnum(mob, EntityType.class));
-        targetAmount = instruction.getVarNum();
-        preCheckAmountNotLessThanOne(targetAmount);
+        targetAmount = instruction.getVarNum(VariableNumber.NOT_LESS_THAN_ONE_CHECKER);
         name = instruction.getOptional("name");
         if (name != null) {
             name = Utils.format(name, true, false).replace('_', ' ');
@@ -52,7 +51,6 @@ public class MobKillObjective extends CountingObjective implements Listener {
     }
 
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @EventHandler(ignoreCancelled = true)
     public void onMobKill(final MobKilledEvent event) {
         final OnlineProfile onlineProfile = event.getProfile().getOnlineProfile().get();

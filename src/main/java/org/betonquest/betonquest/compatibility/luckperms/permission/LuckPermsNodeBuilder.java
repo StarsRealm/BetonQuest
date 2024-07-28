@@ -2,10 +2,10 @@ package org.betonquest.betonquest.compatibility.luckperms.permission;
 
 import net.luckperms.api.context.MutableContextSet;
 import net.luckperms.api.node.Node;
-import org.betonquest.betonquest.VariableNumber;
-import org.betonquest.betonquest.VariableString;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
+import org.betonquest.betonquest.instruction.variable.VariableString;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public record LuckPermsNodeBuilder(List<VariableString> permissions, VariableStr
         final List<Node> buildNodes = new ArrayList<>();
         final String resolvedValue = value.getString(profile);
         final MutableContextSet contextSet = parseContextSet(contexts, profile);
-        final long resolvedExpiry = (long) expiry.getDouble(profile);
+        final long resolvedExpiry = expiry.getValue(profile).longValue();
         final TimeUnit resolvedTimeUnit = getTimeUnit(timeUnit, profile);
         for (final VariableString permission : permissions) {
             Node node = getNode(permission.getString(profile));

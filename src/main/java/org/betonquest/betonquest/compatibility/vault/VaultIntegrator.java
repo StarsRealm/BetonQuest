@@ -4,72 +4,66 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.api.logger.BetonQuestLogger;
+import org.betonquest.betonquest.api.logger.BetonQuestLoggerFactory;
 import org.betonquest.betonquest.compatibility.Integrator;
+import org.betonquest.betonquest.compatibility.vault.condition.MoneyConditionFactory;
+import org.betonquest.betonquest.compatibility.vault.event.MoneyEventFactory;
+import org.betonquest.betonquest.compatibility.vault.event.PermissionEventFactory;
+import org.betonquest.betonquest.compatibility.vault.variable.MoneyVariableFactory;
+import org.betonquest.betonquest.quest.PrimaryServerThreadData;
+import org.betonquest.betonquest.quest.registry.QuestTypeRegistries;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.jetbrains.annotations.Nullable;
+import org.bukkit.plugin.ServicesManager;
 
-@SuppressWarnings("PMD.CommentRequired")
+/**
+ * Integrator for <a href="https://github.com/MilkBowl/VaultAPI">Vault</a>.
+ */
 public class VaultIntegrator implements Integrator {
-    private static VaultIntegrator instance;
-
     /**
      * Custom {@link BetonQuestLogger} instance for this class.
      */
     private final BetonQuestLogger log;
 
+    /**
+     * BetonQuest Plugin for registering.
+     */
     private final BetonQuest plugin;
 
-    @Nullable
-    private Permission permission;
-
-    @Nullable
-    private Economy economy;
-
-    @SuppressWarnings("PMD.AssignmentToNonFinalStatic")
+    /**
+     * Constructor for the Vault Integration.
+     */
     public VaultIntegrator() {
-        instance = this;
         this.log = BetonQuest.getInstance().getLoggerFactory().create(getClass());
         plugin = BetonQuest.getInstance();
     }
 
-    /**
-     * @return the permission
-     */
-    public static Permission getPermission() {
-        return instance.permission;
-    }
-
-    /**
-     * @return the economy
-     */
-    public static Economy getEconomy() {
-        return instance.economy;
-    }
-
     @Override
     public void hook() {
-        final RegisteredServiceProvider<Permission> permissionProvider = Bukkit.getServer().getServicesManager()
-                .getRegistration(Permission.class);
-        if (permissionProvider != null) {
-            permission = permissionProvider.getProvider();
-        }
-        final RegisteredServiceProvider<Economy> economyProvider = Bukkit.getServer().getServicesManager()
-                .getRegistration(Economy.class);
-        if (economyProvider != null) {
-            economy = economyProvider.getProvider();
-        }
-        if (economy == null) {
+        final Server server = plugin.getServer();
+        final PrimaryServerThreadData data = new PrimaryServerThreadData(server, server.getScheduler(), plugin);
+
+        final ServicesManager servicesManager = Bukkit.getServer().getServicesManager();
+        final RegisteredServiceProvider<Economy> economyProvider = servicesManager.getRegistration(Economy.class);
+        if (economyProvider == null) {
             log.warn("There is no economy plugin on the server!");
         } else {
-            plugin.registerEvents("money", MoneyEvent.class);
-            plugin.registerConditions("money", MoneyCondition.class);
-            plugin.registerVariable("money", MoneyVariable.class);
+            final Economy economy = economyProvider.getProvider();
+            final BetonQuestLoggerFactory loggerFactory = plugin.getLoggerFactory();
+            final QuestTypeRegistries registries = plugin.getQuestRegistries();
+
+            registries.getEventTypes().register("money", new MoneyEventFactory(economy, loggerFactory, data, plugin.getVariableProcessor()));
+            registries.getConditionTypes().register("money", new MoneyConditionFactory(economy, data));
+            registries.getVariableTypes().register("money", new MoneyVariableFactory(economy, loggerFactory));
         }
-        if (permission == null) {
+
+        final RegisteredServiceProvider<Permission> permissionProvider = servicesManager.getRegistration(Permission.class);
+        if (permissionProvider == null) {
             log.warn("Could not get permission provider!");
         } else {
-            plugin.registerEvents("permission", PermissionEvent.class);
+            final Permission permission = permissionProvider.getProvider();
+            plugin.getQuestRegistries().getEventTypes().register("permission", new PermissionEventFactory(permission, data));
         }
     }
 
@@ -82,5 +76,4 @@ public class VaultIntegrator implements Integrator {
     public void close() {
         // Empty
     }
-
 }

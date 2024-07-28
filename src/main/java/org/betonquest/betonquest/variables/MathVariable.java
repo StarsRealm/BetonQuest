@@ -7,8 +7,10 @@ import org.betonquest.betonquest.api.logger.BetonQuestLogger;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.quest.registry.processor.VariableProcessor;
 import org.betonquest.betonquest.utils.math.Tokenizer;
 import org.betonquest.betonquest.utils.math.tokens.Token;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -52,11 +54,12 @@ public class MathVariable extends Variable {
             throw new InstructionParseException("invalid format");
         }
         final String expression = expressionMatcher.group("expression");
-        this.calculation = new Tokenizer(instruction.getPackage()).tokenize(expression);
+        final VariableProcessor variableProcessor = BetonQuest.getInstance().getVariableProcessor();
+        this.calculation = new Tokenizer(variableProcessor, instruction.getPackage()).tokenize(expression);
     }
 
     @Override
-    public String getValue(final Profile profile) {
+    public String getValue(@Nullable final Profile profile) {
         try {
             final double value = this.calculation.resolve(profile);
             if (value % 1 == 0) {

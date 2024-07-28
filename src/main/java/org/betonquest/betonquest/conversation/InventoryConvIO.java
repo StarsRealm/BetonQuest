@@ -1,6 +1,5 @@
 package org.betonquest.betonquest.conversation;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.papermc.lib.PaperLib;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.api.config.ConfigurationFile;
@@ -38,7 +37,8 @@ import java.util.Objects;
 /**
  * Inventory GUI for conversations.
  */
-@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyFields", "PMD.TooManyMethods", "PMD.CommentRequired", "PMD.AvoidFieldNameMatchingMethodName", "PMD.AvoidLiteralsInIfCondition", "PMD.NPathComplexity"})
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyFields", "PMD.TooManyMethods", "PMD.CommentRequired",
+        "PMD.AvoidFieldNameMatchingMethodName", "PMD.AvoidLiteralsInIfCondition", "PMD.NPathComplexity", "PMD.CouplingBetweenObjects", "NullAway.Init"})
 public class InventoryConvIO implements Listener, ConversationIO {
 
     private static final Map<String, ItemStack> SKULL_CACHE = new HashMap<>();
@@ -87,39 +87,21 @@ public class InventoryConvIO implements Listener, ConversationIO {
 
     protected boolean printMessages;
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public InventoryConvIO(final Conversation conv, final OnlineProfile onlineProfile) {
         this.log = BetonQuest.getInstance().getLoggerFactory().create(getClass());
         this.conv = conv;
         this.player = onlineProfile.getPlayer();
-        final Map<String, ChatColor[]> colors = ConversationColors.getColors();
-        StringBuilder string = new StringBuilder();
-        for (final ChatColor color : colors.get("npc")) {
-            string.append(color);
-        }
-        this.npcNameColor = string.toString();
-        string = new StringBuilder();
-        for (final ChatColor color : colors.get("text")) {
-            string.append(color);
-        }
-        this.npcTextColor = string.toString();
-        string = new StringBuilder();
-        for (final ChatColor color : colors.get("number")) {
-            string.append(color);
-        }
-        string.append("%number%.");
-        this.numberFormat = string.toString();
-        string = new StringBuilder();
-        for (final ChatColor color : colors.get("option")) {
-            string.append(color);
-        }
-        this.optionColor = string.toString();
-        string = new StringBuilder();
-        for (final ChatColor color : colors.get("player")) {
+        final ConversationColors.Colors colors = ConversationColors.getColors();
+        this.npcNameColor = collect(colors.npc());
+        this.npcTextColor = collect(colors.text());
+        this.numberFormat = collect(colors.number()) + "%number%.";
+        this.optionColor = collect(colors.option());
+        final StringBuilder string = new StringBuilder();
+        for (final ChatColor color : colors.player()) {
             string.append(color);
         }
         string.append(player.getName()).append(ChatColor.RESET).append(": ");
-        for (final ChatColor color : colors.get("answer")) {
+        for (final ChatColor color : colors.answer()) {
             string.append(color);
         }
         answerPrefix = string.toString();
@@ -130,6 +112,14 @@ public class InventoryConvIO implements Listener, ConversationIO {
         showNPCText = pluginConfig.getBoolean("conversation_IO_config.chest.show_npc_text", true);
 
         Bukkit.getPluginManager().registerEvents(this, BetonQuest.getInstance());
+    }
+
+    private String collect(final ChatColor... chatColors) {
+        final StringBuilder string = new StringBuilder();
+        for (final ChatColor color : chatColors) {
+            string.append(color);
+        }
+        return string.toString();
     }
 
     @Override
@@ -146,7 +136,6 @@ public class InventoryConvIO implements Listener, ConversationIO {
 
     @SuppressWarnings({"deprecation", "PMD.CyclomaticComplexity", "PMD.NcssCount", "PMD.NPathComplexity",
             "PMD.CognitiveComplexity", "PMD.UnusedAssignment", "PMD.LambdaCanBeMethodReference"})
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @Override
     public void display() {
         if (conv.isEnded()) {
@@ -155,7 +144,10 @@ public class InventoryConvIO implements Listener, ConversationIO {
         if (player.getGameMode() == GameMode.SPECTATOR) {
             conv.endConversation();
             Bukkit.getScheduler().runTask(BetonQuest.getInstance(), () -> player.closeInventory());
-            conv.getInterceptor().sendMessage(Config.getMessage(PlayerConverter.getID(player).getProfileUUID().toString(), "conversation_spectator"));
+            final Interceptor interceptor = conv.getInterceptor();
+            if (interceptor != null) {
+                interceptor.sendMessage(Config.getMessage(PlayerConverter.getID(player).getProfileUUID().toString(), "conversation_spectator"));
+            }
             return;
         }
 
@@ -235,7 +227,7 @@ public class InventoryConvIO implements Listener, ConversationIO {
             final ItemMeta meta = item.getItemMeta();
 
             final StringBuilder string = new StringBuilder();
-            for (final ChatColor color : ConversationColors.getColors().get("number")) {
+            for (final ChatColor color : ConversationColors.getColors().number()) {
                 string.append(color);
             }
 

@@ -1,8 +1,9 @@
 package org.betonquest.betonquest.utils.math;
 
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.config.quest.QuestPackage;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
+import org.betonquest.betonquest.quest.registry.processor.VariableProcessor;
 import org.betonquest.betonquest.utils.math.tokens.AbsoluteValue;
 import org.betonquest.betonquest.utils.math.tokens.Negation;
 import org.betonquest.betonquest.utils.math.tokens.Number;
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
  * Helps the {@link MathVariable} with parsing mathematical expressions.
  *
  * @deprecated This should be replaced in BQ 2.0 with a real expression parsing lib like
- * https://github.com/fasseg/exp4j
+ * <a href="https://github.com/fasseg/exp4j">fasseg/exp4j</a>
  */
 @Deprecated
 @SuppressWarnings("PMD.GodClass")
@@ -39,6 +40,11 @@ public class Tokenizer {
     private static final Pattern ESCAPE_REGEX = Pattern.compile("\\\\(.)");
 
     /**
+     * {@link VariableProcessor} to resolve variables.
+     */
+    private final VariableProcessor variableProcessor;
+
+    /**
      * Name of the package in which the tokenizer is operating.
      */
     private final QuestPackage pack;
@@ -46,9 +52,11 @@ public class Tokenizer {
     /**
      * Create a new Tokenizer in given package.
      *
-     * @param pack name of the package
+     * @param variableProcessor processor to resolve variables
+     * @param pack              name of the package
      */
-    public Tokenizer(final QuestPackage pack) {
+    public Tokenizer(final VariableProcessor variableProcessor, final QuestPackage pack) {
+        this.variableProcessor = variableProcessor;
         this.pack = pack;
     }
 
@@ -110,7 +118,7 @@ public class Tokenizer {
             final String variableName = ESCAPE_REGEX.matcher(rawVariableName).replaceAll("$1");
 
             try {
-                nextInLine = new Variable(new VariableNumber(pack, "%" + variableName + "%"));
+                nextInLine = new Variable(new VariableNumber(variableProcessor, pack, "%" + variableName + "%"));
             } catch (final InstructionParseException e) {
                 throw new InstructionParseException("invalid calculation (" + e.getMessage() + ")", e);
             }
@@ -128,7 +136,6 @@ public class Tokenizer {
             }
 
             nextInLine = new Parenthesis(tokenize(null, null, val2.substring(start + 1, index)), opening, chr);
-
         } else if (chr == '|') { //tokenize absolute values
             index = findAbsoluteEnd(val2, index);
 
@@ -137,18 +144,15 @@ public class Tokenizer {
             }
 
             nextInLine = new AbsoluteValue(tokenize(null, null, val2.substring(start + 1, index)));
-
         } else if ((numberMatcher = FP_REGEX.matcher(val2)).find()) { //tokenize numbers
             isNegated = false;
             index = numberMatcher.end() - 1;
             nextInLine = new Number(Double.parseDouble(numberMatcher.group()));
-
         } else if (Operator.isOperator(chr)) { //error handling
             if (operator == null) {
                 throw new InstructionParseException("invalid calculation (operator missing first value)");
             }
             throw new InstructionParseException("invalid calculation (doubled operators)");
-
         } else { //tokenize variables
             for (; index < val2.length(); index++) {
                 chr = val2.charAt(index);
@@ -157,7 +161,7 @@ public class Tokenizer {
                 }
             }
             try {
-                nextInLine = new Variable(new VariableNumber(pack, "%" + val2.substring(start, index--) + "%"));
+                nextInLine = new Variable(new VariableNumber(variableProcessor, pack, "%" + val2.substring(start, index--) + "%"));
             } catch (final InstructionParseException e) {
                 throw new InstructionParseException("invalid calculation (" + e.getMessage() + ")", e);
             }
@@ -167,8 +171,14 @@ public class Tokenizer {
             nextInLine = new Negation(nextInLine);
         }
 
-        if (index < val2.length() - 1) {
-            chr = val2.charAt(++index);
+        return tokenizeFurther(val1, operator, val2, index, nextInLine);
+    }
+
+    @SuppressWarnings({"PMD.AvoidLiteralsInIfCondition", "PMD.CognitiveComplexity", "PMD.CyclomaticComplexity", "NullAway"})
+    private Token tokenizeFurther(@Nullable final Token val1, @Nullable final Operator operator, final String val2, final int indexx, final Token nextInLine) throws InstructionParseException {
+        if (indexx < val2.length() - 1) {
+            int index = indexx;
+            final char chr = val2.charAt(++index);
             if (!Operator.isOperator(chr)) {
                 if (chr == ')' || chr == ']') {
                     throw new InstructionParseException("invalid calculation (unbalanced parenthesis)");

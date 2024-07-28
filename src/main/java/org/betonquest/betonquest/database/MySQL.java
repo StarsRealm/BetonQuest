@@ -39,6 +39,7 @@ public class MySQL extends Database {
     /**
      * Creates a new MySQL instance
      *
+     * @param log      the logger that will be used for logging
      * @param plugin   Plugin instance
      * @param hostname Name of the host
      * @param port     Port number
@@ -69,6 +70,9 @@ public class MySQL extends Database {
             }
         } catch (final ClassNotFoundException | SQLException e) {
             log.warn("MySQL says: " + e.getMessage(), e);
+        }
+        if (connection == null) {
+            throw new IllegalStateException("Not able to create a database connection!");
         }
         return connection;
     }

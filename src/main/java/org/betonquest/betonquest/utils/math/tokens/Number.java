@@ -1,12 +1,13 @@
 package org.betonquest.betonquest.utils.math.tokens;
 
 import org.betonquest.betonquest.api.profiles.Profile;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Token that is just any number.
  *
  * @deprecated This should be replaced in BQ 2.0 with a real expression parsing lib like
- * https://github.com/fasseg/exp4j
+ * <a href="https://github.com/fasseg/exp4j">fasseg/exp4j</a>
  */
 @Deprecated
 public class Number implements Token {
@@ -26,7 +27,7 @@ public class Number implements Token {
     }
 
     @Override
-    public double resolve(final Profile profile) {
+    public double resolve(@Nullable final Profile profile) {
         return value;
     }
 

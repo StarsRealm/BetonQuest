@@ -4,10 +4,10 @@ import com.gamingmesh.jobs.api.JobsPaymentEvent;
 import com.gamingmesh.jobs.container.CurrencyType;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.Objective;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
 import org.betonquest.betonquest.utils.PlayerConverter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -15,6 +15,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
 import java.util.Locale;
+import java.util.Objects;
 
 @SuppressWarnings("PMD.CommentRequired")
 public class ObjectivePaymentEvent extends Objective implements Listener {
@@ -23,17 +24,14 @@ public class ObjectivePaymentEvent extends Objective implements Listener {
     public ObjectivePaymentEvent(final Instruction instructions) throws InstructionParseException {
         super(instructions);
         template = PaymentData.class;
-        targetAmount = instructions.getVarNum();
-        if (targetAmount.isExplicitLessThanOne()) {
-            throw new InstructionParseException("Amount needs to be one or more");
-        }
+        targetAmount = instructions.getVarNum(VariableNumber.NOT_LESS_THAN_ONE_CHECKER);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onJobsPaymentEvent(final JobsPaymentEvent event) {
         final Profile profile = PlayerConverter.getID(event.getPlayer());
         if (containsPlayer(profile) && checkConditions(profile)) {
-            final PaymentData playerData = (PaymentData) dataMap.get(profile);
+            final PaymentData playerData = getPaymentData(profile);
             final double previousAmount = playerData.amount;
             playerData.add(event.get(CurrencyType.MONEY));
 
@@ -69,14 +67,21 @@ public class ObjectivePaymentEvent extends Objective implements Listener {
     @Override
     public String getProperty(final String name, final Profile profile) {
         return switch (name.toLowerCase(Locale.ROOT)) {
-            case "amount" -> Double.toString(((PaymentData) dataMap.get(profile)).amount);
+            case "amount" -> Double.toString(getPaymentData(profile).amount);
             case "left" -> {
-                final PaymentData data = (PaymentData) dataMap.get(profile);
+                final PaymentData data = getPaymentData(profile);
                 yield Double.toString(data.targetAmount - data.amount);
             }
-            case "total" -> Double.toString(((PaymentData) dataMap.get(profile)).targetAmount);
+            case "total" -> Double.toString(getPaymentData(profile).targetAmount);
             default -> "";
         };
+    }
+
+    /**
+     * @throws NullPointerException when {@link #containsPlayer(Profile)} is false
+     */
+    private PaymentData getPaymentData(final Profile profile) {
+        return Objects.requireNonNull((PaymentData) dataMap.get(profile));
     }
 
     public static class PaymentData extends ObjectiveData {
@@ -102,6 +107,5 @@ public class ObjectivePaymentEvent extends Objective implements Listener {
         public String toString() {
             return amount + "/" + targetAmount;
         }
-
     }
 }

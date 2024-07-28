@@ -49,6 +49,8 @@ public class Connector {
 
     /**
      * This method should be used before any other database operations.
+     *
+     * @return true if the connection is refreshed successfully
      */
     @SuppressFBWarnings({"ODR_OPEN_DATABASE_RESOURCE", "OBL_UNSATISFIED_OBLIGATION"})
     public final boolean refresh() {
@@ -98,8 +100,7 @@ public class Connector {
             variableResolver.resolve(statement);
             return statement.executeQuery();
         } catch (final SQLException e) {
-            log.error("There was a exception with SQL", e);
-            return null;
+            throw new IllegalStateException("There was a exception with SQL", e);
         }
     }
 

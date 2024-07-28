@@ -6,10 +6,28 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+- BreweryX compatibility
+### Changed
+- `mspawnmob` can now be used in static context
+### Deprecated
+### Removed
+### Fixed
+- LuckPerms integration not sending the permission updates via the messaging service to connected Servers in the same network.
+- LuckPerms TagCalculator trying to use PlayerData even if player is offline
+- Memory Leak in CombatTagger
+- AdvancementIO not working in mc 1.20.5/6 and 1.21
+- chaining of movenpc events did trigger fail events
+- effect event duration -1 did not result in infinite duration
+- translation in conversation got stored in default language
+### Security
+
+## [2.1.2] - 2024-06-23
+### Added
 - LuckPerms permission events
   - `addPermission` event adds a permission to a player
   - `removePermission` event removes a permission from a player
 - Location Vectors can now be chained
+- `eval` variable to resolve a variable string as variable
 ### Changed
 - `AureliumSkills` was renamed to `AuraSkills` the following was changed in BQ
   - `aureliumskillslevel` condition was renamed to `auraskillslevel`
@@ -18,6 +36,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - prevent reply when the text is not completely displayed for the SlowTellRaw conversation IO
 - `resourcepack` objective is now paper only
 - `die` objective now support respawns without canceling the actual death of the player
+- `ph` variable can now be used static
 ### Deprecated
 ### Removed
 ### Fixed

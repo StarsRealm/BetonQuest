@@ -9,7 +9,7 @@ import org.betonquest.betonquest.api.config.quest.QuestPackage;
 import org.betonquest.betonquest.api.logger.BetonQuestLogger;
 import org.betonquest.betonquest.api.logger.BetonQuestLoggerFactory;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
-import org.betonquest.betonquest.compatibility.citizens.events.move.CitizensMoveController;
+import org.betonquest.betonquest.compatibility.citizens.event.move.CitizensMoveController;
 import org.betonquest.betonquest.config.Config;
 import org.betonquest.betonquest.conversation.CombatTagger;
 import org.betonquest.betonquest.exceptions.ObjectNotFoundException;
@@ -159,7 +159,7 @@ public class CitizensConversationStarter {
         final String npcId = String.valueOf(npc.getId());
         final String npcName = npc.getName();
 
-        final boolean npcsByName = Boolean.parseBoolean(Config.getString("config.citizens_npcs_by_name"));
+        final boolean npcsByName = Boolean.parseBoolean(Config.getConfigString("citizens_npcs_by_name"));
 
         final String selector = npcsByName ? npcName : npcId;
         final ConversationID conversationID = assignedConversations.get(selector);

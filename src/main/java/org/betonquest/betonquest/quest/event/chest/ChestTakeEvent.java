@@ -1,12 +1,11 @@
 package org.betonquest.betonquest.quest.event.chest;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.Instruction.Item;
 import org.betonquest.betonquest.api.profiles.Profile;
-import org.betonquest.betonquest.api.quest.event.ComposedEvent;
+import org.betonquest.betonquest.api.quest.event.nullable.NullableEvent;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.item.QuestItem;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Removes items from a chest.
  */
-public class ChestTakeEvent extends AbstractChestEvent implements ComposedEvent {
+public class ChestTakeEvent extends AbstractChestEvent implements NullableEvent {
 
     /**
      * The items to take from the chest.
@@ -24,22 +23,21 @@ public class ChestTakeEvent extends AbstractChestEvent implements ComposedEvent 
     /**
      * Creates a new ChestTakeEvent.
      *
-     * @param compoundLocation The location of the chest.
+     * @param variableLocation The location of the chest.
      * @param items            The items to take from the chest.
      */
-    public ChestTakeEvent(final CompoundLocation compoundLocation, final Item... items) {
-        super(compoundLocation);
+    public ChestTakeEvent(final VariableLocation variableLocation, final Item... items) {
+        super(variableLocation);
         this.items = items.clone();
     }
 
     @Override
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     public void execute(@Nullable final Profile profile) throws QuestRuntimeException {
         try {
             final Inventory inventory = getChest(profile).getInventory();
             for (final Item item : items) {
                 final QuestItem questItem = item.getItem();
-                final int amount = item.getAmount().getInt(profile);
+                final int amount = item.getAmount().getValue(profile).intValue();
                 final ItemStack[] newItems = removeItems(inventory.getContents(), questItem, amount);
                 inventory.setContents(newItems);
             }

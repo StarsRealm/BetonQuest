@@ -2,12 +2,12 @@ package org.betonquest.betonquest.objectives;
 
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.Objective;
 import org.betonquest.betonquest.api.logger.BetonQuestLogger;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.config.Config;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,30 +49,14 @@ public class DelayObjective extends Objective {
         log = BetonQuest.getInstance().getLoggerFactory().create(this.getClass());
         template = DelayData.class;
 
-        delay = parseDelay();
+        delay = instruction.getVarNum(VariableNumber.NOT_LESS_THAN_ZERO_CHECKER);
         interval = instruction.getInt(instruction.getOptional("interval"), 20 * 10);
         if (interval <= 0) {
             throw new InstructionParseException("Interval cannot be less than 1 tick");
         }
     }
 
-    private VariableNumber parseDelay() throws InstructionParseException {
-        final String doubleOrVar = instruction.next();
-        if (doubleOrVar.startsWith("%")) {
-            return new VariableNumber(instruction.getPackage(), doubleOrVar);
-        } else {
-            final double time = Double.parseDouble(doubleOrVar);
-            if (time < 0) {
-                throw new InstructionParseException("Error in delay objective '" + instruction.getID() + "': Delay cannot be less than 0");
-            }
-            return new VariableNumber(time);
-        }
-    }
-
-    private double timeToMilliSeconds(final double time) throws InstructionParseException {
-        if (time < 0) {
-            throw new InstructionParseException("Delay cannot be less than 0");
-        }
+    private double timeToMilliSeconds(final double time) {
         if (instruction.hasArgument("ticks")) {
             return time * 50;
         } else if (instruction.hasArgument("seconds")) {
@@ -118,13 +103,8 @@ public class DelayObjective extends Objective {
 
     @Override
     public String getDefaultDataInstruction(final Profile profile) {
-        double millis = 0;
-        try {
-            final double time = delay.getDouble(profile);
-            millis = timeToMilliSeconds(time);
-        } catch (final InstructionParseException e) {
-            log.warn("Error in delay objective '" + instruction.getID() + "': " + e.getMessage());
-        }
+        final double time = delay.getDouble(profile);
+        final double millis = timeToMilliSeconds(time);
         return Double.toString(new Date().getTime() + millis);
     }
 
@@ -149,7 +129,7 @@ public class DelayObjective extends Objective {
         final String secondsWord = Config.getMessage(lang, "seconds");
         final String secondsWordSingular = Config.getMessage(lang, "seconds_singular");
 
-        final long endTimestamp = (long) ((DelayData) dataMap.get(profile)).getTime();
+        final long endTimestamp = (long) getDelayData(profile).getTime();
         final LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(endTimestamp), ZoneId.systemDefault());
         final Duration duration = Duration.between(LocalDateTime.now(), end);
 
@@ -175,13 +155,20 @@ public class DelayObjective extends Objective {
     }
 
     private String parseVariableDate(final Profile profile) {
-        return new SimpleDateFormat(Config.getString("config.date_format"), Locale.ROOT)
-                .format(new Date((long) ((DelayData) dataMap.get(profile)).getTime()));
+        return new SimpleDateFormat(Config.getConfigString("date_format"), Locale.ROOT)
+                .format(new Date((long) getDelayData(profile).getTime()));
     }
 
     private String parseVariableRawSeconds(final Profile profile) {
-        final double timeLeft = ((DelayData) dataMap.get(profile)).getTime() - new Date().getTime();
+        final double timeLeft = getDelayData(profile).getTime() - new Date().getTime();
         return String.valueOf(timeLeft / 1000);
+    }
+
+    /**
+     * @throws NullPointerException when {@link #containsPlayer(Profile)} is false
+     */
+    private DelayData getDelayData(final Profile profile) {
+        return Objects.requireNonNull((DelayData) dataMap.get(profile));
     }
 
     public static class DelayData extends ObjectiveData {
@@ -196,6 +183,5 @@ public class DelayObjective extends Objective {
         private double getTime() {
             return timestamp;
         }
-
     }
 }

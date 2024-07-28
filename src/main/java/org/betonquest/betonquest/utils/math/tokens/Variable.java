@@ -1,14 +1,15 @@
 package org.betonquest.betonquest.utils.math.tokens;
 
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A token that is a Variable.
  *
  * @deprecated This should be replaced in BQ 2.0 with a real expression parsing lib like
- * https://github.com/fasseg/exp4j
+ * <a href="https://github.com/fasseg/exp4j">fasseg/exp4j</a>
  */
 @Deprecated
 public class Variable implements Token {
@@ -28,8 +29,8 @@ public class Variable implements Token {
     }
 
     @Override
-    public double resolve(final Profile profile) throws QuestRuntimeException {
-        return variableNumber.getDouble(profile);
+    public double resolve(@Nullable final Profile profile) throws QuestRuntimeException {
+        return variableNumber.getValue(profile).doubleValue();
     }
 
     @Override

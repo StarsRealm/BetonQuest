@@ -1,10 +1,10 @@
 package org.betonquest.betonquest.variables;
 
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.Variable;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
@@ -132,7 +132,7 @@ public class RandomNumberVariable extends Variable {
     }
 
     @Override
-    public String getValue(final Profile profile) {
+    public String getValue(@Nullable final Profile profile) {
         try {
             if (fractional) {
                 final double value = ThreadLocalRandom.current().nextDouble(low.getDouble(profile), high.getDouble(profile));

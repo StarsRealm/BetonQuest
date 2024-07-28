@@ -1,6 +1,5 @@
 package org.betonquest.betonquest.objectives;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
 import org.betonquest.betonquest.api.Objective;
@@ -9,8 +8,8 @@ import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.utils.PlayerConverter;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
@@ -26,7 +25,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -42,7 +40,7 @@ public class DieObjective extends Objective implements Listener {
     private final boolean cancel;
 
     @Nullable
-    private final CompoundLocation location;
+    private final VariableLocation location;
 
     public DieObjective(final Instruction instruction) throws InstructionParseException {
         super(instruction);
@@ -76,7 +74,6 @@ public class DieObjective extends Objective implements Listener {
         }
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onLastDamage(final EntityDamageEvent event) {
         if (!cancel || !(event.getEntity() instanceof final Player player)) {
@@ -99,7 +96,6 @@ public class DieObjective extends Objective implements Listener {
                 public void run() {
                     targetLocation.ifPresent(player::teleport);
                     player.setFireTicks(0);
-
                 }
             }.runTaskLater(BetonQuest.getInstance(), 1);
             completeObjective(onlineProfile);
@@ -107,8 +103,11 @@ public class DieObjective extends Objective implements Listener {
     }
 
     private Optional<Location> getLocation(final OnlineProfile onlineProfile) {
+        if (location == null) {
+            return Optional.empty();
+        }
         try {
-            return Optional.of(Objects.requireNonNull(location).getLocation(onlineProfile));
+            return Optional.of(location.getValue(onlineProfile));
         } catch (final QuestRuntimeException e) {
             log.warn(instruction.getPackage(), "Error while handling '" + instruction.getID() + "' objective: " + e.getMessage(), e);
             return Optional.empty();
@@ -134,5 +133,4 @@ public class DieObjective extends Objective implements Listener {
     public String getProperty(final String name, final Profile profile) {
         return "";
     }
-
 }

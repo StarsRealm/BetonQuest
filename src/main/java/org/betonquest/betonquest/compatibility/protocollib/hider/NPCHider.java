@@ -1,6 +1,5 @@
 package org.betonquest.betonquest.compatibility.protocollib.hider;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCSpawnEvent;
 import net.citizensnpcs.api.npc.NPC;
@@ -58,6 +57,8 @@ public final class NPCHider extends BukkitRunnable implements Listener {
 
     /**
      * Starts (or restarts) the NPCHider. It loads the current configuration for hidden NPCs
+     *
+     * @param log the logger that will be used for logging
      */
     public static void start(final BetonQuestLogger log) {
         if (instance != null) {
@@ -69,12 +70,12 @@ public final class NPCHider extends BukkitRunnable implements Listener {
     /**
      * @return the currently used NPCHider instance
      */
+    @Nullable
     public static NPCHider getInstance() {
         return instance;
     }
 
     @SuppressWarnings("PMD.CognitiveComplexity")
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     private void loadFromConfig() {
 
         for (final QuestPackage cfgPackage : Config.getPackages().values()) {
@@ -90,7 +91,7 @@ public final class NPCHider extends BukkitRunnable implements Listener {
                     npcId = Integer.parseInt(npcIds);
                 } catch (final NumberFormatException e) {
                     log.warn(cfgPackage, "NPC ID '" + npcIds + "' is not a valid number, in hide_npcs", e);
-                    continue npcs;
+                    continue;
                 }
                 final Set<ConditionID> conditions = new HashSet<>();
                 final String conditionsString = section.getString(npcIds);
@@ -111,7 +112,6 @@ public final class NPCHider extends BukkitRunnable implements Listener {
                 }
             }
         }
-
     }
 
     @Override

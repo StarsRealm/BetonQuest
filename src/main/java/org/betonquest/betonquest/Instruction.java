@@ -10,12 +10,14 @@ import org.betonquest.betonquest.id.ID;
 import org.betonquest.betonquest.id.ItemID;
 import org.betonquest.betonquest.id.NoID;
 import org.betonquest.betonquest.id.ObjectiveID;
-import org.betonquest.betonquest.instruction.QuotingTokenizer;
-import org.betonquest.betonquest.instruction.Tokenizer;
-import org.betonquest.betonquest.instruction.TokenizerException;
+import org.betonquest.betonquest.instruction.tokenizer.QuotingTokenizer;
+import org.betonquest.betonquest.instruction.tokenizer.Tokenizer;
+import org.betonquest.betonquest.instruction.tokenizer.TokenizerException;
+import org.betonquest.betonquest.instruction.variable.Variable;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.item.QuestItem;
 import org.betonquest.betonquest.utils.BlockSelector;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -246,6 +248,7 @@ public class Instruction {
      * @return the value or the default value
      */
     @Contract("_, !null -> !null")
+    @Nullable
     public String getOptional(final String prefix, @Nullable final String defaultString) {
         return getOptionalArgument(prefix).orElse(defaultString);
     }
@@ -280,7 +283,7 @@ public class Instruction {
     ///    OBJECTS    ///
     /////////////////////
 
-    public CompoundLocation getLocation() throws InstructionParseException {
+    public VariableLocation getLocation() throws InstructionParseException {
         return getLocation(next());
     }
 
@@ -291,7 +294,7 @@ public class Instruction {
      * @return the location if it was defined in the instruction
      * @throws InstructionParseException if the location format is invalid
      */
-    public Optional<CompoundLocation> getLocationArgument(final String prefix) throws InstructionParseException {
+    public Optional<VariableLocation> getLocationArgument(final String prefix) throws InstructionParseException {
         final Optional<String> argument = getOptionalArgument(prefix);
         if (argument.isPresent()) {
             return Optional.of(getLocation(argument.get()));
@@ -300,28 +303,42 @@ public class Instruction {
     }
 
     @Contract(NULL_NOT_NULL_CONTRACT)
-    public CompoundLocation getLocation(@Nullable final String string) throws InstructionParseException {
+    @Nullable
+    public VariableLocation getLocation(@Nullable final String string) throws InstructionParseException {
         if (string == null) {
             return null;
         }
         try {
-            return new CompoundLocation(pack, string);
+            return new VariableLocation(BetonQuest.getInstance().getVariableProcessor(), pack, string);
         } catch (final InstructionParseException e) {
             throw new PartParseException("Error while parsing location: " + e.getMessage(), e);
         }
     }
 
     public VariableNumber getVarNum() throws InstructionParseException {
-        return getVarNum(next());
+        return getVarNum(next(), (value) -> {
+        });
+    }
+
+    public VariableNumber getVarNum(final Variable.ValueChecker<Number> valueChecker) throws InstructionParseException {
+        return getVarNum(next(), valueChecker);
     }
 
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public VariableNumber getVarNum(@Nullable final String string) throws InstructionParseException {
+        return getVarNum(string, (value) -> {
+        });
+    }
+
+    @Contract("null, _ -> null; !null, _ -> !null")
+    @Nullable
+    public VariableNumber getVarNum(@Nullable final String string, final Variable.ValueChecker<Number> valueChecker) throws InstructionParseException {
         if (string == null) {
             return null;
         }
         try {
-            return new VariableNumber(pack, string);
+            return new VariableNumber(pack, string, valueChecker);
         } catch (final InstructionParseException e) {
             throw new PartParseException("Could not parse a number: " + e.getMessage(), e);
         }
@@ -332,6 +349,7 @@ public class Instruction {
     }
 
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public QuestItem getQuestItem(@Nullable final String string) throws InstructionParseException {
         if (string == null) {
             return null;
@@ -372,7 +390,7 @@ public class Instruction {
                     number = getVarNum(parts[1]);
                 } else {
                     item = getItem(array[i]);
-                    number = new VariableNumber(1);
+                    number = getVarNum("1");
                 }
                 items[i] = new Item(item, number);
             } catch (final InstructionParseException | NumberFormatException e) {
@@ -388,6 +406,7 @@ public class Instruction {
 
     @SuppressWarnings({"deprecation", "PMD.ReturnEmptyCollectionRatherThanNull"})
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public Map<Enchantment, Integer> getEnchantments(@Nullable final String string) throws InstructionParseException {
         if (string == null) {
             return null;
@@ -420,6 +439,7 @@ public class Instruction {
 
     @SuppressWarnings("PMD.ReturnEmptyCollectionRatherThanNull")
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public List<PotionEffect> getEffects(@Nullable final String string) throws InstructionParseException {
         if (string == null) {
             return null;
@@ -454,11 +474,13 @@ public class Instruction {
     }
 
     @Contract("null, _ -> null; !null, _ -> !null")
+    @Nullable
     public <T extends Enum<T>> T getEnum(@Nullable final String string, final Class<T> clazz) throws InstructionParseException {
         return getEnum(string, clazz, null);
     }
 
     @Contract("_, _, !null -> !null")
+    @Nullable
     public <T extends Enum<T>> T getEnum(@Nullable final String string, final Class<T> clazz, @Nullable final T defaultValue) throws InstructionParseException {
         if (string == null) {
             return defaultValue;
@@ -475,6 +497,7 @@ public class Instruction {
     }
 
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public Material getMaterial(@Nullable final String string) {
         if (string == null) {
             return null;
@@ -487,6 +510,7 @@ public class Instruction {
     }
 
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public BlockSelector getBlockSelector(@Nullable final String string) throws InstructionParseException {
         return string == null ? null : new BlockSelector(string);
     }
@@ -516,6 +540,7 @@ public class Instruction {
     }
 
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public EventID getEvent(@Nullable final String string) throws InstructionParseException {
         if (string == null) {
             return null;
@@ -532,6 +557,7 @@ public class Instruction {
     }
 
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public ConditionID getCondition(@Nullable final String string) throws InstructionParseException {
         if (string == null) {
             return null;
@@ -548,6 +574,7 @@ public class Instruction {
     }
 
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public ObjectiveID getObjective(@Nullable final String string) throws InstructionParseException {
         if (string == null) {
             return null;
@@ -564,6 +591,7 @@ public class Instruction {
     }
 
     @Contract(NULL_NOT_NULL_CONTRACT)
+    @Nullable
     public ItemID getItem(@Nullable final String string) throws InstructionParseException {
         if (string == null) {
             return null;
@@ -687,7 +715,9 @@ public class Instruction {
     /////////////////////////
 
     public interface Converter<T> {
-        T convert(String string) throws InstructionParseException;
+        @Contract(NULL_NOT_NULL_CONTRACT)
+        @Nullable
+        T convert(@Nullable String string) throws InstructionParseException;
     }
 
     @SuppressWarnings("PMD.ShortClassName")

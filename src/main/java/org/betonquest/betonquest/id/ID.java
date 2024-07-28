@@ -15,7 +15,7 @@ import java.util.Objects;
  * Identifies any object(events, objectives, conversations etc.) of BetonQuest's scripting system via the path syntax.
  * Handles relative and absolute paths.
  */
-@SuppressWarnings({"PMD.ShortClassName", "PMD.AbstractClassWithoutAbstractMethod"})
+@SuppressWarnings({"PMD.ShortClassName", "PMD.AbstractClassWithoutAbstractMethod", "PMD.GodClass"})
 public abstract class ID {
 
     /**
@@ -30,14 +30,14 @@ public abstract class ID {
             "conversations", "cancel", "items");
 
     /**
+     * The package the object is in.
+     */
+    protected final QuestPackage pack;
+
+    /**
      * The identifier of the object without the package name.
      */
     protected String identifier;
-
-    /**
-     * The package the object is in.
-     */
-    protected QuestPackage pack;
 
     /**
      * The created instruction of the object.
@@ -52,36 +52,27 @@ public abstract class ID {
      * @param identifier the id instruction string
      * @throws ObjectNotFoundException if the ID could not be parsed
      */
-    @SuppressWarnings("PMD.CyclomaticComplexity")
     protected ID(@Nullable final QuestPackage pack, final String identifier) throws ObjectNotFoundException {
         if (identifier.isEmpty()) {
             throw new ObjectNotFoundException("ID is null");
         }
         if (identifier.contains(".")) {
-            int dotIndex = identifier.indexOf('.');
-            final String packName = identifier.substring(0, dotIndex);
-            if (pack != null && packName.startsWith(UP_STR + "-")) {
-                resolveRelativePathUp(pack, identifier, packName);
-            } else if (pack != null && packName.startsWith("-")) {
-                resolveRelativePathDown(pack, identifier, packName);
-            } else {
-                dotIndex = getDotIndex(pack, identifier, packName, dotIndex);
+            final int dotIndex = identifier.indexOf('.');
+            final QuestPackage parsed = parsePackageFromIdentifier(pack, identifier, dotIndex);
+            if (parsed != null) {
+                this.pack = parsed;
+                this.identifier = identifier.substring(dotIndex + 1);
+                return;
             }
-            if (identifier.length() == dotIndex + 1) {
-                throw new ObjectNotFoundException("ID of the pack '" + this.pack + "' is null");
-            }
-            this.identifier = identifier.substring(dotIndex + 1);
-        } else {
             if (pack == null) {
-                throw new ObjectNotFoundException("No package specified for id '" + identifier + "'!");
+                throw new ObjectNotFoundException("Package in ID '" + identifier + "' does not exist");
             }
-            this.pack = pack;
-            this.identifier = identifier;
         }
-
-        if (this.pack == null) {
-            throw new ObjectNotFoundException("Package in ID '" + identifier + "' does not exist");
+        if (pack == null) {
+            throw new ObjectNotFoundException("No package specified for id '" + identifier + "'!");
         }
+        this.pack = pack;
+        this.identifier = identifier;
     }
 
     /**
@@ -102,21 +93,42 @@ public abstract class ID {
         instruction = new Instruction(BetonQuest.getInstance().getLoggerFactory().create(Instruction.class), this.pack, this, rawInstruction);
     }
 
-    private int getDotIndex(@Nullable final QuestPackage pack, final String identifier, final String packName, final int dotIndex) {
-        final String[] parts = identifier.split(":")[0].split("\\.");
-        final QuestPackage potentialPack = Config.getPackages().get(packName);
-        if (potentialPack == null) {
-            this.pack = pack;
-            return -1;
+    @Nullable
+    private QuestPackage parsePackageFromIdentifier(@Nullable final QuestPackage pack, final String identifier, final int dotIndex) throws ObjectNotFoundException {
+        final String packName = identifier.substring(0, dotIndex);
+        if (pack != null) {
+            if (packName.startsWith(UP_STR + "-")) {
+                return resolveRelativePathUp(pack, identifier, packName);
+            }
+            if (packName.startsWith("-")) {
+                return resolveRelativePathDown(pack, identifier, packName);
+            }
         }
-        if (BetonQuest.isVariableType(packName)) {
-            return resolveIdOfVariable(pack, parts, potentialPack, dotIndex);
+        final QuestPackage packFromDot = getDotIndex(identifier, packName);
+        if (packFromDot != null) {
+            return packFromDot;
         }
-        this.pack = potentialPack;
-        return dotIndex;
+        if (identifier.length() == dotIndex + 1) {
+            throw new ObjectNotFoundException("ID of the pack is null");
+        }
+        return null;
     }
 
-    private void resolveRelativePathUp(final QuestPackage pack, final String identifier, final String packName) throws ObjectNotFoundException {
+    @Nullable
+    private QuestPackage getDotIndex(final String identifier, final String packName) {
+        final QuestPackage potentialPack = Config.getPackages().get(packName);
+        if (potentialPack == null) {
+            return null;
+        }
+        final String[] parts = identifier.split(":")[0].split("\\.");
+        if (BetonQuest.isVariableType(packName)) {
+            return resolveIdOfVariable(parts, potentialPack);
+        }
+        return potentialPack;
+    }
+
+    @SuppressWarnings("PMD.CyclomaticComplexity")
+    private QuestPackage resolveRelativePathUp(final QuestPackage pack, final String identifier, final String packName) throws ObjectNotFoundException {
         final String[] root = pack.getQuestPath().split("-");
         final String[] path = packName.split("-");
         int stepsUp = 0;
@@ -134,44 +146,47 @@ public abstract class ID {
         for (int i = stepsUp; i < path.length; i++) {
             builder.append(path[i]).append('-');
         }
-        final String absolute = builder.substring(0, builder.length() - 1);
-        this.pack = Config.getPackages().get(absolute);
-        if (this.pack == null) {
-            throw new ObjectNotFoundException("Relative path in ID '" + identifier + "' resolved to '"
-                    + absolute + "', but this package does not exist!");
+        try {
+            final String absolute = builder.substring(0, builder.length() - 1);
+            final QuestPackage resolved = Config.getPackages().get(absolute);
+            if (resolved == null) {
+                throw new ObjectNotFoundException("Relative path in ID '" + identifier + "' resolved to '"
+                        + absolute + "', but this package does not exist!");
+            }
+            return resolved;
+        } catch (final StringIndexOutOfBoundsException e) {
+            throw new ObjectNotFoundException("Relative path in ID '" + identifier + "' is invalid!", e);
         }
     }
 
-    private void resolveRelativePathDown(final QuestPackage pack, final String identifier, final String packName) throws ObjectNotFoundException {
+    private QuestPackage resolveRelativePathDown(final QuestPackage pack, final String identifier, final String packName) throws ObjectNotFoundException {
         final String currentPath = pack.getQuestPath();
         final String fullPath = currentPath + packName;
 
-        this.pack = Config.getPackages().get(fullPath);
-        if (this.pack == null) {
+        final QuestPackage resolved = Config.getPackages().get(fullPath);
+        if (resolved == null) {
             throw new ObjectNotFoundException("Relative path in ID '" + identifier + "' resolved to '"
                     + fullPath + "', but this package does not exist!");
         }
+        return resolved;
     }
 
     @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
-    private int resolveIdOfVariable(final QuestPackage pack, final String[] parts, final QuestPackage potentialPack, final int dotIndex) {
-        int index = dotIndex;
+    @Nullable
+    private QuestPackage resolveIdOfVariable(final String[] parts, final QuestPackage potentialPack) {
         if (parts.length == 2 && isIdFromPack(potentialPack, parts[1])) {
-            this.pack = potentialPack;
+            return potentialPack;
         } else if (parts.length > 2) {
             if (BetonQuest.isVariableType(parts[1]) && isIdFromPack(potentialPack, parts[2])) {
-                this.pack = potentialPack;
+                return potentialPack;
             } else if (isIdFromPack(potentialPack, parts[1])) {
-                this.pack = pack;
-                index = -1;
+                return null;
             } else {
-                this.pack = potentialPack;
+                return potentialPack;
             }
         } else {
-            this.pack = pack;
-            index = -1;
+            return null;
         }
-        return index;
     }
 
     /**

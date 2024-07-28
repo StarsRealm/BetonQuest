@@ -1,8 +1,9 @@
 package org.betonquest.betonquest.quest.event.item;
 
-import org.betonquest.betonquest.VariableNumber;
-import org.betonquest.betonquest.api.profiles.Profile;
-import org.betonquest.betonquest.api.quest.event.Event;
+import org.betonquest.betonquest.api.profiles.OnlineProfile;
+import org.betonquest.betonquest.api.quest.event.online.OnlineEvent;
+import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
 import org.betonquest.betonquest.quest.event.point.Point;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -21,7 +22,7 @@ import java.util.Random;
 /**
  * The item durability event, to modify the durability of an item.
  */
-public class ItemDurabilityEvent implements Event {
+public class ItemDurabilityEvent implements OnlineEvent {
     /**
      * The slot to target.
      */
@@ -72,8 +73,8 @@ public class ItemDurabilityEvent implements Event {
     }
 
     @Override
-    public void execute(final Profile profile) {
-        final Player player = profile.getOnlineProfile().get().getPlayer();
+    public void execute(final OnlineProfile profile) throws QuestRuntimeException {
+        final Player player = profile.getPlayer();
         final EntityEquipment equipment = player.getEquipment();
         final ItemStack itemStack = equipment.getItem(slot);
         if (itemStack.getType().isAir() || !(itemStack.getItemMeta() instanceof final Damageable damageable)) {
@@ -82,7 +83,7 @@ public class ItemDurabilityEvent implements Event {
         if (damageable.isUnbreakable() && !ignoreUnbreakable) {
             return;
         }
-        final double value = amount.getDouble(profile);
+        final double value = amount.getValue(profile).doubleValue();
         if (value == 0) {
             if (modification == Point.SET || modification == Point.MULTIPLY) {
                 processBreak(player, itemStack, damageable);

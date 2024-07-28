@@ -1,10 +1,11 @@
 package org.betonquest.betonquest.conditions;
 
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.Condition;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
+import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
 import org.betonquest.betonquest.item.QuestItem;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -32,6 +33,9 @@ public class ItemDurabilityCondition extends Condition {
 
     /**
      * Creates an item durability condition.
+     *
+     * @param instruction the instruction to create the condition from
+     * @throws InstructionParseException if there was an error parsing the instruction
      */
     public ItemDurabilityCondition(final Instruction instruction) throws InstructionParseException {
         super(instruction, false);
@@ -41,7 +45,7 @@ public class ItemDurabilityCondition extends Condition {
     }
 
     @Override
-    protected Boolean execute(final Profile profile) {
+    protected Boolean execute(final Profile profile) throws QuestRuntimeException {
         final ItemStack itemStack = profile.getOnlineProfile().get().getPlayer().getEquipment().getItem(slot);
         if (itemStack.getType().isAir() || !(itemStack.getItemMeta() instanceof final Damageable damageable)) {
             return false;
@@ -51,7 +55,7 @@ public class ItemDurabilityCondition extends Condition {
             return false;
         }
         final int actualDurability = maxDurability - damageable.getDamage();
-        final double requiredAmount = amount.getDouble(profile);
+        final double requiredAmount = amount.getValue(profile).doubleValue();
         if (relative) {
             final double relativeValue = (double) actualDurability / maxDurability;
             return relativeValue >= requiredAmount;

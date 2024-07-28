@@ -19,7 +19,8 @@ import org.betonquest.betonquest.api.logger.BetonQuestLoggerFactory;
 import org.betonquest.betonquest.api.logger.CachingBetonQuestLoggerFactory;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.api.profiles.Profile;
-import org.betonquest.betonquest.api.quest.event.ComposedEventFactory;
+import org.betonquest.betonquest.api.quest.PlayerQuestFactory;
+import org.betonquest.betonquest.api.quest.PlayerlessQuestFactory;
 import org.betonquest.betonquest.api.quest.event.EventFactory;
 import org.betonquest.betonquest.api.quest.event.StaticEventFactory;
 import org.betonquest.betonquest.api.schedule.Schedule;
@@ -107,13 +108,12 @@ import org.betonquest.betonquest.notify.SubTitleNotifyIO;
 import org.betonquest.betonquest.notify.SuppressNotifyIO;
 import org.betonquest.betonquest.notify.TitleNotifyIO;
 import org.betonquest.betonquest.notify.TotemNotifyIO;
-import org.betonquest.betonquest.quest.event.ComposedEventFactoryAdapter;
-import org.betonquest.betonquest.quest.event.NullStaticEventFactory;
-import org.betonquest.betonquest.quest.event.legacy.FromClassQuestEventFactory;
-import org.betonquest.betonquest.quest.event.legacy.QuestEventFactory;
-import org.betonquest.betonquest.quest.event.legacy.QuestEventFactoryAdapter;
+import org.betonquest.betonquest.quest.legacy.LegacyTypeFactory;
 import org.betonquest.betonquest.quest.registry.CoreQuestTypes;
 import org.betonquest.betonquest.quest.registry.QuestRegistry;
+import org.betonquest.betonquest.quest.registry.QuestTypeRegistries;
+import org.betonquest.betonquest.quest.registry.processor.VariableProcessor;
+import org.betonquest.betonquest.quest.registry.type.QuestTypeRegistry;
 import org.betonquest.betonquest.utils.PlayerConverter;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -145,11 +145,9 @@ import java.util.logging.Handler;
  */
 @SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.CyclomaticComplexity", "PMD.GodClass", "PMD.TooManyMethods",
         "PMD.CommentRequired", "PMD.AvoidDuplicateLiterals", "PMD.AvoidFieldNameMatchingMethodName",
-        "PMD.AtLeastOneConstructor", "PMD.ExcessivePublicCount", "PMD.TooManyFields"})
+        "PMD.AtLeastOneConstructor", "PMD.ExcessivePublicCount", "PMD.TooManyFields", "NullAway.Init"})
 public class BetonQuest extends JavaPlugin {
     private static final int BSTATS_METRICS_ID = 551;
-
-    private static final Map<String, Class<? extends Condition>> CONDITION_TYPES = new HashMap<>();
 
     private static final Map<String, Class<? extends Objective>> OBJECTIVE_TYPES = new HashMap<>();
 
@@ -158,8 +156,6 @@ public class BetonQuest extends JavaPlugin {
     private static final Map<String, Class<? extends Interceptor>> INTERCEPTOR_TYPES = new HashMap<>();
 
     private static final Map<String, Class<? extends NotifyIO>> NOTIFY_IO_TYPES = new HashMap<>();
-
-    private static final Map<String, Class<? extends Variable>> VARIABLE_TYPES = new HashMap<>();
 
     private static final Map<String, EventScheduling.ScheduleType<?>> SCHEDULE_TYPES = new HashMap<>();
 
@@ -178,17 +174,17 @@ public class BetonQuest extends JavaPlugin {
      */
     private static BetonQuest instance;
 
-    /**
-     * Map of registered events.
-     */
-    private final Map<String, QuestEventFactory> eventTypes = new HashMap<>();
-
     private final Map<Profile, PlayerData> playerDataMap = new ConcurrentHashMap<>();
 
     /**
      * Stores Conditions, Events, Objectives, Variables, Conversations and Cancelers.
      */
     private QuestRegistry questRegistry;
+
+    /**
+     * Registry for quest core elements.
+     */
+    private QuestTypeRegistries questTypeRegistries;
 
     private BetonQuestLoggerFactory loggerFactory;
 
@@ -223,7 +219,7 @@ public class BetonQuest extends JavaPlugin {
     private RPGMenu rpgMenu;
 
     /**
-     * Cache for event schedulers, holding the last execution of an event
+     * Cache for event schedulers, holding the last execution of an event.
      */
     private LastExecutionCache lastExecutionCache;
 
@@ -264,7 +260,7 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Checks if the condition described by conditionID is met
+     * Checks if the condition described by conditionID is met.
      *
      * @param conditionID ID of the condition to check
      * @param profile     the {@link Profile} of the player which should be checked
@@ -287,7 +283,7 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Creates new objective for given player
+     * Creates new objective for given player.
      *
      * @param profile     the {@link Profile} of the player
      * @param objectiveID ID of the objective
@@ -297,7 +293,7 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Resumes the existing objective for given player
+     * Resumes the existing objective for given player.
      *
      * @param profile     the {@link Profile} of the player
      * @param objectiveID ID of the objective
@@ -316,14 +312,13 @@ public class BetonQuest extends JavaPlugin {
      * @return the Variable instance
      * @throws InstructionParseException when the variable parsing fails
      */
-    @Nullable
     public static Variable createVariable(@Nullable final QuestPackage pack, final String instruction)
             throws InstructionParseException {
         return instance.questRegistry.variables().create(pack, instruction);
     }
 
     public static boolean isVariableType(final String type) {
-        return VARIABLE_TYPES.get(type) != null;
+        return instance.getQuestRegistries().getVariableTypes().getFactory(type) != null;
     }
 
     /**
@@ -521,10 +516,12 @@ public class BetonQuest extends JavaPlugin {
         new CompassCommand();
         new LangCommand(loggerFactory.create(LangCommand.class));
 
-        questRegistry = new QuestRegistry(loggerFactory.create(QuestRegistry.class), loggerFactory, this,
-                SCHEDULE_TYPES, CONDITION_TYPES, eventTypes, OBJECTIVE_TYPES, VARIABLE_TYPES);
+        questTypeRegistries = new QuestTypeRegistries(loggerFactory);
 
-        new CoreQuestTypes(loggerFactory, getServer(), getServer().getScheduler(), this).register();
+        questRegistry = new QuestRegistry(loggerFactory.create(QuestRegistry.class), loggerFactory, this,
+                SCHEDULE_TYPES, questTypeRegistries, OBJECTIVE_TYPES);
+
+        new CoreQuestTypes(loggerFactory, getServer(), getServer().getScheduler(), this).register(questTypeRegistries);
 
         registerConversationIO("simple", SimpleConvIO.class);
         registerConversationIO("tellraw", TellrawConvIO.class);
@@ -588,7 +585,6 @@ public class BetonQuest extends JavaPlugin {
         setupUpdater();
 
         rpgMenu = new RPGMenu(loggerFactory.create(RPGMenu.class), loggerFactory, menuConfigAccessor);
-        rpgMenu.onEnable();
 
         PaperLib.suggestPaper(this);
         getInstance().log.info("BetonQuest successfully enabled!");
@@ -608,11 +604,11 @@ public class BetonQuest extends JavaPlugin {
         final DownloadSource downloadSource = new TempFileDownloadSource(new WebDownloadSource());
         final UpdateDownloader updateDownloader = new UpdateDownloader(downloadSource, file);
 
-        final GitHubReleaseSource gitHubReleaseSource = new GitHubReleaseSource("https://api.github.com/repos/BetonQuest/BetonQuest",
-                new WebContentSource(GitHubReleaseSource.HTTP_CODE_HANDLER));
         final NexusReleaseAndDevelopmentSource nexusReleaseAndDevelopmentSource = new NexusReleaseAndDevelopmentSource("https://nexus.betonquest.org/",
                 new WebContentSource());
-        final List<ReleaseUpdateSource> releaseHandlers = List.of(gitHubReleaseSource, nexusReleaseAndDevelopmentSource);
+        final GitHubReleaseSource gitHubReleaseSource = new GitHubReleaseSource("https://api.github.com/repos/BetonQuest/BetonQuest",
+                new WebContentSource(GitHubReleaseSource.HTTP_CODE_HANDLER));
+        final List<ReleaseUpdateSource> releaseHandlers = List.of(nexusReleaseAndDevelopmentSource, gitHubReleaseSource);
         final List<DevelopmentUpdateSource> developmentHandlers = List.of(nexusReleaseAndDevelopmentSource);
         final UpdateSourceHandler updateSourceHandler = new UpdateSourceHandler(loggerFactory.create(UpdateSourceHandler.class), releaseHandlers, developmentHandlers);
 
@@ -696,7 +692,6 @@ public class BetonQuest extends JavaPlugin {
     @SuppressWarnings("PMD.DoNotUseThreads")
     @Override
     public void onDisable() {
-        //stop all schedules
         if (questRegistry != null) {
             questRegistry.stopAllEventSchedules();
         }
@@ -725,7 +720,6 @@ public class BetonQuest extends JavaPlugin {
 
         if (this.adventure != null) {
             this.adventure.close();
-            this.adventure = null;
         }
 
         if (rpgMenu != null) {
@@ -735,7 +729,7 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Returns the database instance
+     * Returns the database instance.
      *
      * @return Database instance
      */
@@ -757,7 +751,7 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Checks if MySQL is used or not
+     * Checks if MySQL is used or not.
      *
      * @return if MySQL is used (false means that SQLite is being used)
      */
@@ -819,7 +813,7 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Retrieves GlobalData object which handles all global tags and points
+     * Retrieves GlobalData object which handles all global tags and points.
      *
      * @return GlobalData object
      */
@@ -828,7 +822,7 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Removes the database playerData from the map
+     * Removes the database playerData from the map.
      *
      * @param profile the {@link Profile} of the player whose playerData is to be removed
      */
@@ -837,14 +831,17 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Registers new condition classes by their names
+     * Registers new condition classes by their names.
      *
      * @param name           name of the condition type
      * @param conditionClass class object for the condition
+     * @deprecated replaced by {@link #getQuestRegistries()}
+     * further {@link QuestTypeRegistries#getConditionTypes()}
+     * further {@linkplain QuestTypeRegistry#registerCombined}
      */
+    @Deprecated
     public void registerConditions(final String name, final Class<? extends Condition> conditionClass) {
-        getInstance().log.debug("Registering " + name + " condition type");
-        CONDITION_TYPES.put(name, conditionClass);
+        questTypeRegistries.getConditionTypes().register(name, conditionClass);
     }
 
     /**
@@ -856,8 +853,7 @@ public class BetonQuest extends JavaPlugin {
      */
     @Deprecated
     public void registerEvents(final String name, final Class<? extends QuestEvent> eventClass) {
-        getInstance().log.debug("Registering " + name + " event type");
-        eventTypes.put(name, new FromClassQuestEventFactory<>(loggerFactory.create(eventClass), eventClass));
+        questTypeRegistries.getEventTypes().register(name, eventClass);
     }
 
     /**
@@ -866,9 +862,12 @@ public class BetonQuest extends JavaPlugin {
      *
      * @param name         name of the event
      * @param eventFactory factory to create the event
+     * @deprecated in favor of direct usage of {@link #getQuestRegistries()}
+     * further {@link QuestTypeRegistries#getEventTypes()}
      */
+    @Deprecated
     public void registerNonStaticEvent(final String name, final EventFactory eventFactory) {
-        registerEvent(name, eventFactory, new NullStaticEventFactory());
+        questTypeRegistries.getEventTypes().register(name, eventFactory);
     }
 
     /**
@@ -878,9 +877,13 @@ public class BetonQuest extends JavaPlugin {
      * @param name         name of the event
      * @param eventFactory factory to create the event and the static event
      * @param <T>          type of factory that creates both normal and static instances of the event.
+     * @deprecated in favor of direct usage of {@link #getQuestRegistries()}
+     * further {@link QuestTypeRegistries#getEventTypes()}
+     * further {@link QuestTypeRegistry#registerCombined(String, PlayerQuestFactory)}
      */
+    @Deprecated
     public <T extends EventFactory & StaticEventFactory> void registerEvent(final String name, final T eventFactory) {
-        registerEvent(name, eventFactory, eventFactory);
+        questTypeRegistries.getEventTypes().registerCombined(name, eventFactory);
     }
 
     /**
@@ -890,27 +893,17 @@ public class BetonQuest extends JavaPlugin {
      * @param name               name of the event
      * @param eventFactory       factory to create the event
      * @param staticEventFactory factory to create the static event
+     * @deprecated in favor of direct usage of {@link #getQuestRegistries()}
+     * further {@link QuestTypeRegistries#getEventTypes()}
+     * further {@link QuestTypeRegistry#register(String, PlayerQuestFactory, PlayerlessQuestFactory)}
      */
+    @Deprecated
     public void registerEvent(final String name, final EventFactory eventFactory, final StaticEventFactory staticEventFactory) {
-        getInstance().log.debug("Registering " + name + " event type");
-        eventTypes.put(name, new QuestEventFactoryAdapter(eventFactory, staticEventFactory));
+        questTypeRegistries.getEventTypes().register(name, eventFactory, staticEventFactory);
     }
 
     /**
-     * Registers an event with its name and a single factory to create both normal and
-     * static instances of the event.
-     *
-     * @param name         name of the event
-     * @param eventFactory factory to create the event and the static event
-     */
-    public void registerEvent(final String name, final ComposedEventFactory eventFactory) {
-        final ComposedEventFactoryAdapter adapter = new ComposedEventFactoryAdapter(eventFactory);
-        getInstance().log.debug("Registering " + name + " event type");
-        eventTypes.put(name, new QuestEventFactoryAdapter(adapter, adapter));
-    }
-
-    /**
-     * Registers new objective classes by their names
+     * Registers new objective classes by their names.
      *
      * @param name           name of the objective type
      * @param objectiveClass class object for the objective
@@ -958,10 +951,12 @@ public class BetonQuest extends JavaPlugin {
      *
      * @param name     name of the variable type
      * @param variable class object of this type
+     * @deprecated in favor of direct usage of {@link #getQuestRegistries()}
+     * further {@link QuestTypeRegistries#getVariableTypes()}
      */
+    @Deprecated
     public void registerVariable(final String name, final Class<? extends Variable> variable) {
-        getInstance().log.debug("Registering " + name + " variable type");
-        VARIABLE_TYPES.put(name, variable);
+        getQuestRegistries().getVariableTypes().register(name, variable);
     }
 
     /**
@@ -977,7 +972,7 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * Returns the list of objectives of this player
+     * Returns the list of objectives of this player.
      *
      * @param profile the {@link Profile} of the player
      * @return list of this player's active objectives
@@ -995,6 +990,7 @@ public class BetonQuest extends JavaPlugin {
      * @return ConversationData object for this conversation or null if it does
      * not exist
      */
+    @Nullable
     public ConversationData getConversation(final ConversationID conversationID) {
         return instance.questRegistry.conversations().getConversation(conversationID);
     }
@@ -1043,9 +1039,22 @@ public class BetonQuest extends JavaPlugin {
      * @param name     name of the variable (instruction, with % characters)
      * @param profile  the {@link Profile} of the player
      * @return the value of this variable for given player
+     * @deprecated use {@link #getVariableProcessor()} {@link VariableProcessor#getValue(QuestPackage, String, Profile)}
+     * instead
      */
+    @Deprecated
     public String getVariableValue(final String packName, final String name, @Nullable final Profile profile) {
-        return questRegistry.variables().getValue(packName, name, profile);
+        final QuestPackage pack = Config.getPackages().get(packName);
+        if (pack == null) {
+            log.warn("The variable '" + name + "' reference the non-existent package '" + packName + "' !");
+            return "";
+        }
+        try {
+            return questRegistry.variables().getValue(pack, name, profile);
+        } catch (final InstructionParseException e) {
+            log.warn(e.getMessage(), e);
+            return "";
+        }
     }
 
     /**
@@ -1053,19 +1062,23 @@ public class BetonQuest extends JavaPlugin {
      *
      * @param name the name of the event
      * @return a factory to create the event
+     * @deprecated in favor of direct usage of {@link #getQuestRegistries()}
+     * further {@link QuestTypeRegistries#getEventTypes()}
+     * further {@link QuestTypeRegistry#getFactory(String)}
      */
+    @Deprecated
     @Nullable
-    public QuestEventFactory getEventFactory(final String name) {
-        return eventTypes.get(name);
+    public LegacyTypeFactory<QuestEvent> getEventFactory(final String name) {
+        return questTypeRegistries.getEventTypes().getFactory(name);
     }
 
     /**
-     * @param name the name of the condition class, as previously registered
-     * @return the class of the event
+     * Gets the QuestRegistry holding the core Quest types.
+     *
+     * @return registry holding Conditions and Events
      */
-    @Nullable
-    public Class<? extends Condition> getConditionClass(final String name) {
-        return CONDITION_TYPES.get(name);
+    public QuestTypeRegistries getQuestRegistries() {
+        return questTypeRegistries;
     }
 
     /**
@@ -1079,16 +1092,18 @@ public class BetonQuest extends JavaPlugin {
     }
 
     /**
-     * @return the condition types map
-     */
-    public Map<String, Class<? extends Condition>> getConditionTypes() {
-        return new HashMap<>(CONDITION_TYPES);
-    }
-
-    /**
      * @return the objective types map
      */
     public Map<String, Class<? extends Objective>> getObjectiveTypes() {
         return new HashMap<>(OBJECTIVE_TYPES);
+    }
+
+    /**
+     * Get the VariableProcessor instance.
+     *
+     * @return the VariableProcessor to resolve variables
+     */
+    public VariableProcessor getVariableProcessor() {
+        return questRegistry.variables();
     }
 }

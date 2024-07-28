@@ -1,9 +1,7 @@
 package org.betonquest.betonquest.objectives;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.CountingObjective;
 import org.betonquest.betonquest.api.config.quest.QuestPackage;
 import org.betonquest.betonquest.api.logger.BetonQuestLogger;
@@ -11,9 +9,10 @@ import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.utils.BlockSelector;
 import org.betonquest.betonquest.utils.PlayerConverter;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -40,7 +39,7 @@ public class FishObjective extends CountingObjective implements Listener {
     private final BlockSelector blockSelector;
 
     @Nullable
-    private final CompoundLocation hookTargetLocation;
+    private final VariableLocation hookTargetLocation;
 
     @Nullable
     private final VariableNumber rangeVar;
@@ -49,14 +48,13 @@ public class FishObjective extends CountingObjective implements Listener {
         super(instruction, "fish_to_catch");
         this.log = BetonQuest.getInstance().getLoggerFactory().create(getClass());
         blockSelector = new BlockSelector(instruction.next());
-        targetAmount = instruction.getVarNum();
-        preCheckAmountNotLessThanOne(targetAmount);
+        targetAmount = instruction.getVarNum(VariableNumber.NOT_LESS_THAN_ONE_CHECKER);
 
         final QuestPackage pack = instruction.getPackage();
         final String loc = instruction.getOptional("hookLocation");
         final String range = instruction.getOptional("range");
         if (loc != null && range != null) {
-            hookTargetLocation = new CompoundLocation(pack, loc);
+            hookTargetLocation = new VariableLocation(BetonQuest.getInstance().getVariableProcessor(), pack, loc);
             rangeVar = new VariableNumber(pack, range);
         } else {
             hookTargetLocation = null;
@@ -64,7 +62,6 @@ public class FishObjective extends CountingObjective implements Listener {
         }
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onFishCatch(final PlayerFishEvent event) {
         if (event.getState() != State.CAUGHT_FISH) {
@@ -91,7 +88,7 @@ public class FishObjective extends CountingObjective implements Listener {
 
         final Location targetLocation;
         try {
-            targetLocation = hookTargetLocation.getLocation(profile);
+            targetLocation = hookTargetLocation.getValue(profile);
         } catch (final QuestRuntimeException e) {
             log.warn(e.getMessage(), e);
             return true;

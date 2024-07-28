@@ -2,13 +2,13 @@ package org.betonquest.betonquest.conditions;
 
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.Condition;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
 import org.betonquest.betonquest.id.ConditionID;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
 import org.betonquest.betonquest.utils.Utils;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +46,7 @@ public class PartyCondition extends Condition {
     @Override
     protected Boolean execute(final Profile profile) throws QuestRuntimeException {
         // get the party
-        final Set<OnlineProfile> members = Utils.getParty(profile.getOnlineProfile().get(), range.getDouble(profile),
+        final Set<OnlineProfile> members = Utils.getParty(profile.getOnlineProfile().get(), range.getValue(profile).doubleValue(),
                 conditions).keySet();
         // check every condition against every player - all of them must meet those conditions
         final Stream<OnlineProfile> partyStream = Bukkit.isPrimaryThread() ? members.stream() : members.parallelStream();

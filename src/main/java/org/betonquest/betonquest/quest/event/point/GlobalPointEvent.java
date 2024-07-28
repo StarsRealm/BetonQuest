@@ -1,41 +1,41 @@
 package org.betonquest.betonquest.quest.event.point;
 
 import org.betonquest.betonquest.BetonQuest;
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.profiles.Profile;
-import org.betonquest.betonquest.api.quest.event.ComposedEvent;
+import org.betonquest.betonquest.api.quest.event.nullable.NullableEvent;
 import org.betonquest.betonquest.database.GlobalData;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 /**
- * Modifies global Points
+ * Modifies global Points.
  */
-public class GlobalPointEvent implements ComposedEvent {
+public class GlobalPointEvent implements NullableEvent {
     /**
-     * The global data
+     * The global data.
      */
     private final GlobalData globalData;
 
     /**
-     * The category name
+     * The category name.
      */
     private final String category;
 
     /**
-     * The count
+     * The count.
      */
     private final VariableNumber count;
 
     /**
-     * The point type, how the points should be modified
+     * The point type, how the points should be modified.
      */
     private final Point pointType;
 
     /**
-     * Creates a new global point event
+     * Creates a new global point event.
      *
      * @param category  the category name
      * @param count     the count
@@ -54,6 +54,6 @@ public class GlobalPointEvent implements ComposedEvent {
                 .filter(p -> p.getCategory().equalsIgnoreCase(category))
                 .findFirst();
         globalData.setPoints(category, pointType.modify(
-                globalPoint.map(org.betonquest.betonquest.Point::getCount).orElse(0), count.getDouble(profile)));
+                globalPoint.map(org.betonquest.betonquest.Point::getCount).orElse(0), count.getValue(profile).doubleValue()));
     }
 }

@@ -1,19 +1,18 @@
 package org.betonquest.betonquest.objectives;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.betonquest.betonquest.BetonQuest;
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableNumber;
-import org.betonquest.betonquest.VariableString;
 import org.betonquest.betonquest.api.CountingObjective;
 import org.betonquest.betonquest.api.logger.BetonQuestLogger;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
+import org.betonquest.betonquest.instruction.variable.VariableString;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.utils.PlayerConverter;
 import org.betonquest.betonquest.utils.Utils;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -31,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -50,7 +50,7 @@ public class EntityInteractObjective extends CountingObjective {
     private final BetonQuestLogger log;
 
     @Nullable
-    private final CompoundLocation loc;
+    private final VariableLocation loc;
 
     private final VariableNumber range;
 
@@ -81,8 +81,7 @@ public class EntityInteractObjective extends CountingObjective {
         template = EntityInteractData.class;
         interaction = instruction.getEnum(Interaction.class);
         mobType = instruction.getEnum(EntityType.class);
-        targetAmount = instruction.getVarNum();
-        preCheckAmountNotLessThanOne(targetAmount);
+        targetAmount = instruction.getVarNum(VariableNumber.NOT_LESS_THAN_ONE_CHECKER);
         customName = parseName(instruction.getOptional("name"));
         realName = parseName(instruction.getOptional("realname"));
         final String markedString = instruction.getOptional("marked");
@@ -121,7 +120,6 @@ public class EntityInteractObjective extends CountingObjective {
     }
 
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.CognitiveComplexity"})
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     private boolean onInteract(final Player player, final Entity entity) {
         // check if it's the right entity type
         if (!entity.getType().equals(mobType)) {
@@ -150,8 +148,8 @@ public class EntityInteractObjective extends CountingObjective {
         // Check location matches
         if (loc != null) {
             try {
-                final Location location = loc.getLocation(onlineProfile);
-                final double pRange = range.getDouble(onlineProfile);
+                final Location location = loc.getValue(onlineProfile);
+                final double pRange = range.getValue(onlineProfile).doubleValue();
                 if (!entity.getWorld().equals(location.getWorld())
                         || entity.getLocation().distance(location) > pRange) {
                     return false;
@@ -161,7 +159,7 @@ public class EntityInteractObjective extends CountingObjective {
             }
         }
 
-        final boolean success = ((EntityInteractData) dataMap.get(onlineProfile)).tryProgressWithEntity(entity);
+        final boolean success = Objects.requireNonNull((EntityInteractData) dataMap.get(onlineProfile)).tryProgressWithEntity(entity);
         if (success) {
             completeIfDoneOrNotify(onlineProfile);
         }
@@ -210,7 +208,6 @@ public class EntityInteractObjective extends CountingObjective {
         public String toString() {
             return super.toString() + ";" + entities.stream().map(UUID::toString).collect(Collectors.joining("/"));
         }
-
     }
 
     private class LeftClickListener implements Listener {

@@ -2,16 +2,17 @@ package org.betonquest.betonquest.compatibility.mmogroup.mmoitems;
 
 import net.Indyuce.mmoitems.api.Type;
 import org.betonquest.betonquest.Instruction;
-import org.betonquest.betonquest.VariableNumber;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.api.profiles.Profile;
 import org.betonquest.betonquest.events.AbstractTakeEvent;
 import org.betonquest.betonquest.events.TakeEvent;
 import org.betonquest.betonquest.exceptions.InstructionParseException;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.VariableNumber;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,7 +40,7 @@ public class MMOItemsTakeEvent extends AbstractTakeEvent {
 
         final String amount = instruction.getOptional("amount");
         if (amount == null) {
-            deleteAmountVar = new VariableNumber(1);
+            deleteAmountVar = instruction.getVarNum("1");
         } else {
             deleteAmountVar = instruction.getVarNum(amount);
         }
@@ -61,7 +62,7 @@ public class MMOItemsTakeEvent extends AbstractTakeEvent {
 
     @Override
     protected ItemStack[] takeDesiredAmount(final Profile profile, final ItemStack... items) {
-        int desiredDeletions = neededDeletions.get(profile.getProfileUUID());
+        int desiredDeletions = Objects.requireNonNull(neededDeletions.get(profile.getProfileUUID()));
 
         for (int i = 0; i < items.length && desiredDeletions > 0; i++) {
             final ItemStack item = items[i];

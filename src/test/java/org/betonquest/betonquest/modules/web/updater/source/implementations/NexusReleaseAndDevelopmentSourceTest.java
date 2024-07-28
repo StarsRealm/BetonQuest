@@ -23,10 +23,11 @@ class NexusReleaseAndDevelopmentSourceTest {
     @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     @Test
     void returns_correct_release_versions_with_url() throws IOException {
-        final Path filePathShadedPage1 = Path.of("src/test/resources/modules/web/updater/nexusShadedPage1.json");
-        final Path filePathShadedPage2 = Path.of("src/test/resources/modules/web/updater/nexusShadedPage2.json");
-        final String apiUrlShadedPage1 = API_URL + NexusReleaseAndDevelopmentSource.SERVICE_REST_V_1 + NexusReleaseAndDevelopmentSource.SEARCH_URL;
-        final String apiUrlShadedPage2 = API_URL + NexusReleaseAndDevelopmentSource.SERVICE_REST_V_1 + NexusReleaseAndDevelopmentSource.SEARCH_URL + NexusReleaseAndDevelopmentSource.CONTINUATION_TOKEN + "2";
+        final Path filePathShadedPage1 = Path.of("src/test/resources/modules/web/updater/nexusShadedPageRelease1.json");
+        final Path filePathShadedPage2 = Path.of("src/test/resources/modules/web/updater/nexusShadedPageRelease2.json");
+        final String searchUrl = "/search/assets?repository=betonquest&group=org.betonquest&name=betonquest&maven.extension=jar&maven.classifier=shaded&sort=version&prerelease=false";
+        final String apiUrlShadedPage1 = API_URL + NexusReleaseAndDevelopmentSource.SERVICE_REST_V_1 + searchUrl;
+        final String apiUrlShadedPage2 = API_URL + NexusReleaseAndDevelopmentSource.SERVICE_REST_V_1 + searchUrl + NexusReleaseAndDevelopmentSource.CONTINUATION_TOKEN + "2";
 
         final ContentSource contentSource = url ->
                 switch (url.toString()) {
@@ -36,12 +37,9 @@ class NexusReleaseAndDevelopmentSourceTest {
                 };
         final NexusReleaseAndDevelopmentSource source = new NexusReleaseAndDevelopmentSource(API_URL, contentSource);
 
-        final Map<Version, String> versions = source.getReleaseVersions();
+        final Map<Version, String> versions = source.getReleaseVersions(new Version("1.12.4"));
 
-        assertEquals(3, versions.size(), "Expected two versions from getReleaseVersions");
-        final String url1 = versions.get(new Version("1.12.4"));
-        assertEquals(API_URL + "/repository/betonquest/org/betonquest/betonquest/1.12.4/betonquest-1.12.4-shaded.jar", url1,
-                "The download URL is not correct");
+        assertEquals(2, versions.size(), "Expected two versions from getReleaseVersions");
         final String url2 = versions.get(new Version("1.12.5"));
         assertEquals(API_URL + "/repository/betonquest/org/betonquest/betonquest/1.12.5/betonquest-1.12.5-shaded.jar", url2,
                 "The download URL is not correct");
@@ -53,10 +51,11 @@ class NexusReleaseAndDevelopmentSourceTest {
     @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
     @Test
     void returns_correct_development_versions_with_url() throws IOException {
-        final Path filePathShadedPage1 = Path.of("src/test/resources/modules/web/updater/nexusShadedPage1.json");
-        final Path filePathShadedPage2 = Path.of("src/test/resources/modules/web/updater/nexusShadedPage2.json");
-        final String apiUrlShadedPage1 = API_URL + NexusReleaseAndDevelopmentSource.SERVICE_REST_V_1 + NexusReleaseAndDevelopmentSource.SEARCH_URL;
-        final String apiUrlShadedPage2 = API_URL + NexusReleaseAndDevelopmentSource.SERVICE_REST_V_1 + NexusReleaseAndDevelopmentSource.SEARCH_URL + NexusReleaseAndDevelopmentSource.CONTINUATION_TOKEN + "2";
+        final Path filePathShadedPage1 = Path.of("src/test/resources/modules/web/updater/nexusShadedPageDevelopment1.json");
+        final Path filePathShadedPage2 = Path.of("src/test/resources/modules/web/updater/nexusShadedPageDevelopment2.json");
+        final String searchUrl = "/search/assets?repository=betonquest&group=org.betonquest&name=betonquest&maven.extension=jar&maven.classifier=shaded&sort=version&prerelease=true";
+        final String apiUrlShadedPage1 = API_URL + NexusReleaseAndDevelopmentSource.SERVICE_REST_V_1 + searchUrl;
+        final String apiUrlShadedPage2 = API_URL + NexusReleaseAndDevelopmentSource.SERVICE_REST_V_1 + searchUrl + NexusReleaseAndDevelopmentSource.CONTINUATION_TOKEN + "2";
 
         final Path filePathPom1 = Path.of("src/test/resources/modules/web/updater/nexusPom1.xml");
         final Path filePathPom2 = Path.of("src/test/resources/modules/web/updater/nexusPom2.xml");
@@ -73,7 +72,7 @@ class NexusReleaseAndDevelopmentSourceTest {
                 };
         final NexusReleaseAndDevelopmentSource source = new NexusReleaseAndDevelopmentSource(API_URL, contentSource);
 
-        final Map<Version, String> versions = source.getDevelopmentVersions();
+        final Map<Version, String> versions = source.getDevelopmentVersions(new Version("1.12.0"));
 
         assertEquals(2, versions.size(), "Expected two versions from getReleaseVersions");
         final String url1 = versions.get(new Version("2.0.0-DEV-495"));

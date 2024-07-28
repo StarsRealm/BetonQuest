@@ -1,5 +1,6 @@
 package org.betonquest.betonquest.compatibility.effectlib;
 
+import de.slikey.effectlib.EffectManager;
 import de.slikey.effectlib.util.DynamicLocation;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
@@ -8,8 +9,8 @@ import org.betonquest.betonquest.api.logger.BetonQuestLogger;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
 import org.betonquest.betonquest.compatibility.protocollib.hider.NPCHider;
 import org.betonquest.betonquest.exceptions.QuestRuntimeException;
+import org.betonquest.betonquest.instruction.variable.location.VariableLocation;
 import org.betonquest.betonquest.utils.PlayerConverter;
-import org.betonquest.betonquest.utils.location.CompoundLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
@@ -27,6 +28,11 @@ public class EffectLibRunnable extends BukkitRunnable {
      * Custom {@link BetonQuestLogger} instance for this class.
      */
     private final BetonQuestLogger log;
+
+    /**
+     * Effect manager which will create and control the particles.
+     */
+    private final EffectManager manager;
 
     /**
      * The configuration of the effect to show.
@@ -47,11 +53,13 @@ public class EffectLibRunnable extends BukkitRunnable {
      * Constructs this runnable with the given effect.
      *
      * @param log                 the logger that will be used for logging
-     * @param effectConfiguration the effect to show.
+     * @param manager             the effect manager which will create and control the particles
+     * @param effectConfiguration the effect to show
      */
-    public EffectLibRunnable(final BetonQuestLogger log, final EffectConfiguration effectConfiguration) {
+    public EffectLibRunnable(final BetonQuestLogger log, final EffectManager manager, final EffectConfiguration effectConfiguration) {
         super();
         this.log = log;
+        this.manager = manager;
         this.effectConfiguration = effectConfiguration;
         this.activeProfiles = new ArrayList<>();
     }
@@ -97,17 +105,17 @@ public class EffectLibRunnable extends BukkitRunnable {
                 continue;
             }
 
-            EffectLibIntegrator.getEffectManager().start(effect.effectClass(), effect.settings(), new DynamicLocation(npc.getEntity()),
+            manager.start(effect.effectClass(), effect.settings(), new DynamicLocation(npc.getEntity()),
                     new DynamicLocation(null, null), (ConfigurationSection) null, player);
         }
     }
 
     private void runLocationEffects(final OnlineProfile profile, final EffectConfiguration effect) {
-        for (final CompoundLocation compoundLocation : effect.locations()) {
+        for (final VariableLocation variableLocation : effect.locations()) {
             final Location location;
             try {
-                location = compoundLocation.getLocation(profile);
-                EffectLibIntegrator.getEffectManager().start(effect.effectClass(), effect.settings(), location, profile.getPlayer());
+                location = variableLocation.getValue(profile);
+                manager.start(effect.effectClass(), effect.settings(), location, profile.getPlayer());
             } catch (final QuestRuntimeException exception) {
                 log.warn("Error while resolving a location of an EffectLib particle effect of type '" + effect.effectClass() + "'. Check that your location (variables) are correct. Error:", exception);
             }
