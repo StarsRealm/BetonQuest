@@ -20,7 +20,6 @@ import org.betonquest.betonquest.conditions.FacingCondition;
 import org.betonquest.betonquest.conditions.FlyingCondition;
 import org.betonquest.betonquest.conditions.GameModeCondition;
 import org.betonquest.betonquest.conditions.GlobalPointCondition;
-import org.betonquest.betonquest.conditions.GlobalTagCondition;
 import org.betonquest.betonquest.conditions.HandCondition;
 import org.betonquest.betonquest.conditions.HealthCondition;
 import org.betonquest.betonquest.conditions.HeightCondition;
@@ -44,12 +43,8 @@ import org.betonquest.betonquest.conditions.RideCondition;
 import org.betonquest.betonquest.conditions.ScoreboardCondition;
 import org.betonquest.betonquest.conditions.SneakCondition;
 import org.betonquest.betonquest.conditions.StageCondition;
-import org.betonquest.betonquest.conditions.TagCondition;
 import org.betonquest.betonquest.conditions.TimeCondition;
-import org.betonquest.betonquest.conditions.VariableCondition;
 import org.betonquest.betonquest.conditions.WeatherCondition;
-import org.betonquest.betonquest.conditions.WorldCondition;
-import org.betonquest.betonquest.events.TakeEvent;
 import org.betonquest.betonquest.objectives.ActionObjective;
 import org.betonquest.betonquest.objectives.ArrowShootObjective;
 import org.betonquest.betonquest.objectives.BlockObjective;
@@ -87,6 +82,10 @@ import org.betonquest.betonquest.quest.condition.advancement.AdvancementConditio
 import org.betonquest.betonquest.quest.condition.block.BlockConditionFactory;
 import org.betonquest.betonquest.quest.condition.realtime.DayOfWeekConditionFactory;
 import org.betonquest.betonquest.quest.condition.realtime.PartialDateConditionFactory;
+import org.betonquest.betonquest.quest.condition.tag.GlobalTagConditionFactory;
+import org.betonquest.betonquest.quest.condition.tag.TagConditionFactory;
+import org.betonquest.betonquest.quest.condition.variable.VariableConditionFactory;
+import org.betonquest.betonquest.quest.condition.world.WorldConditionFactory;
 import org.betonquest.betonquest.quest.event.burn.BurnEventFactory;
 import org.betonquest.betonquest.quest.event.cancel.CancelEventFactory;
 import org.betonquest.betonquest.quest.event.chat.ChatEventFactory;
@@ -138,6 +137,7 @@ import org.betonquest.betonquest.quest.event.spawn.SpawnMobEventFactory;
 import org.betonquest.betonquest.quest.event.stage.StageEventFactory;
 import org.betonquest.betonquest.quest.event.tag.TagGlobalEventFactory;
 import org.betonquest.betonquest.quest.event.tag.TagPlayerEventFactory;
+import org.betonquest.betonquest.quest.event.take.TakeEventFactory;
 import org.betonquest.betonquest.quest.event.teleport.TeleportEventFactory;
 import org.betonquest.betonquest.quest.event.time.TimeEventFactory;
 import org.betonquest.betonquest.quest.event.variable.VariableEventFactory;
@@ -238,7 +238,7 @@ public class CoreQuestTypes {
         conditionTypes.register("fly", FlyingCondition.class);
         conditionTypes.register("gamemode", GameModeCondition.class);
         conditionTypes.register("globalpoint", GlobalPointCondition.class);
-        conditionTypes.register("globaltag", GlobalTagCondition.class);
+        conditionTypes.register("globaltag", new GlobalTagConditionFactory(betonQuest.getGlobalData()));
         conditionTypes.register("hand", HandCondition.class);
         conditionTypes.register("health", HealthCondition.class);
         conditionTypes.register("height", HeightCondition.class);
@@ -265,12 +265,12 @@ public class CoreQuestTypes {
         conditionTypes.register("score", ScoreboardCondition.class);
         conditionTypes.register("sneak", SneakCondition.class);
         conditionTypes.register("stage", StageCondition.class);
-        conditionTypes.register("tag", TagCondition.class);
+        conditionTypes.register("tag", new TagConditionFactory(betonQuest));
         conditionTypes.registerCombined("testforblock", new BlockConditionFactory(data));
         conditionTypes.register("time", TimeCondition.class);
-        conditionTypes.register("variable", VariableCondition.class);
+        conditionTypes.register("variable", new VariableConditionFactory(loggerFactory, data, betonQuest.getVariableProcessor()));
         conditionTypes.register("weather", WeatherCondition.class);
-        conditionTypes.register("world", WorldCondition.class);
+        conditionTypes.register("world", new WorldConditionFactory(loggerFactory, data, betonQuest.getVariableProcessor()));
     }
 
     private void registerEvents(final EventTypeRegistry eventTypes) {
@@ -325,7 +325,7 @@ public class CoreQuestTypes {
         eventTypes.register("stage", new StageEventFactory(betonQuest));
         eventTypes.register("sudo", new SudoEventFactory(loggerFactory, data));
         eventTypes.registerCombined("tag", new TagPlayerEventFactory(betonQuest, betonQuest.getSaver()));
-        eventTypes.register("take", TakeEvent.class);
+        eventTypes.register("take", new TakeEventFactory(loggerFactory));
         eventTypes.register("teleport", new TeleportEventFactory(loggerFactory, data));
         eventTypes.registerCombined("time", new TimeEventFactory(server, data, betonQuest.getVariableProcessor()));
         eventTypes.register("variable", new VariableEventFactory(betonQuest, betonQuest.getVariableProcessor()));

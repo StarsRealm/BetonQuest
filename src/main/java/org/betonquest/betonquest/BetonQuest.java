@@ -481,6 +481,7 @@ public class BetonQuest extends JavaPlugin {
         saver.start();
         Backup.loadDatabaseFromBackup(configAccessorFactory);
 
+        globalData = new GlobalData();
         new JoinQuitListener(loggerFactory);
 
         new QuestItemHandler();
@@ -547,7 +548,6 @@ public class BetonQuest extends JavaPlugin {
         registerScheduleType("realtime-cron", RealtimeCronSchedule.class, new RealtimeCronScheduler(loggerFactory.create(RealtimeCronScheduler.class, "Schedules"), lastExecutionCache));
 
         new Compatibility();
-        globalData = new GlobalData();
 
         // schedule quest data loading on the first tick, so all other
         // plugins can register their types

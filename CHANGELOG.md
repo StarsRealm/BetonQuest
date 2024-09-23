@@ -6,12 +6,19 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+- new conversation options
+  - `start_new_lines` the amount of new lines that should be printed before the conversation starts
+  - `npc_text_fill_new_lines` should lined be filled between the NPC text and the player answer options
+- `world` condition now supports variables for the world name
+- underscores are now escapable in item names and lore via `\_`
 ### Changed
 - `spawn` event now only spawn mobs and no other entities
 ### Deprecated
 ### Removed
 ### Fixed
-- broken title check in book `QuestItem` 
+- broken title check in book `QuestItem`
+- BlockSelector did not match exact block matches and started regex matching causing performance issues during load and reload
+- wrong order of arguments in fire work effects
 ### Security
 
 ## [2.1.3] - 2024-08-06
