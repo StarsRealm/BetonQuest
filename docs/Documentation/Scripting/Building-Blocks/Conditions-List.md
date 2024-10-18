@@ -16,6 +16,8 @@ This includes the namespace, the tab and the name of the advancement as configur
 
 ## Conjunction: `and`
 
+**static**
+
 Conjunction of specified conditions. This means that every condition has to be met in order for conjunction to be true. Used only in complex alternatives, because conditions generally work as conjunction. Instruction string is exactly the same as in `alternative`.
 
 !!! example
@@ -273,6 +275,8 @@ This condition will return true if the player has specified entry in his journal
 
 ## Language: `language`
 
+**persistent**
+
 This condition is fulfilled as long as the player has one of the specified languages selected as their quest language.
 
 !!! example
@@ -300,12 +304,22 @@ Checks if the player is looking at a block with the given location or material. 
 
 ## Moon Cycle: `mooncycle`
 
-This condition checks the players moon cycle (1 is full moon, 8 is Waxing Gibbous) and returns if the player is under that moon. A list of phases can be found [here](https://minecraft.wiki/w/Moon).
+**static**
 
-!!! example
-    ```YAML
-    mooncycle 1
-    ```
+This condition checks the moon cycle (1 is full moon, 8 is Waxing Gibbous) in the given world or the players world. A list of phases can be 
+found 
+[here](https://minecraft.wiki/w/Moon).
+    
+| Parameter   | Syntax     | Default Value          | Explanation                                               |
+|-------------|------------|------------------------|-----------------------------------------------------------|
+| _MoonPhase_ | Number     | :octicons-x-circle-16: | The MoonPhase to check for. Can be a variable.            |
+| _world_     | world:name | player location        | The world to check for the moon phase. Can be a variable. |
+
+
+```YAML title="Example"
+fullMoon: "mooncycle 1"
+newMoonHub: "mooncycle 5 world:hub"
+```
 
 ## Number compare: `numbercompare`
 
@@ -350,12 +364,15 @@ The example is true between the 1st and the 5th or on the 20th of each month, bu
 
 ## Party: `party`
 
+**static**
+
 This is part of the [party system](../Parties.md).
-This condition takes three optional arguments: `every:`, `any:` and `count:`.  
+This condition takes three optional arguments: `every:`, `any:`, `count:` and `location:`.  
 "Every" is a list of conditions that must be met by every player in the party.  
 Any is a list of conditions that must be met by at least one player in a party (it doesn't have to be the same player,
 one can meet first condition, another one can meet the rest, and it will work).  
 Count is just a number, minimal amount of players in the party.
+Location can be used to create a party without the need of a player that is the center of the party.
 You don't have to specify all those arguments, you can use only one if you want.
 
 !!! example
@@ -412,24 +429,38 @@ This one requires the player to wear armor which gives him specified amount of p
     ```YAML
     rating 10
     ```
-
+    
 ## Real time: `realtime`
 
-There must a specific (real) time for this condition to return true. You need to specify two times (formatted like `hh:mm`) separated by dash. If the first is before the second the time must be between these two, if its after the second the time must be later than the first and earlier than the second to return true.
+**static****persistent**
 
-!!! example
-    ```YAML
-    realtime 8:00-12:30
-    ```
+There must a specific (real) time for this condition to return true.
+
+| Parameter  | Syntax            | Default Value          | Explanation                                                                                                  |
+|------------|-------------------|------------------------|--------------------------------------------------------------------------------------------------------------|
+| _Timespan_ | startTime-endTime | :octicons-x-circle-16: | Two points of time seperated by dash in the 24-hour format (0 - 24). The minutes are optional (hh or hh:mm). |
+
+
+```YAML title="Example"
+allDayReal: "realtime 6-19"
+midnightReal: "realtime 23:30-0:30"
+knoppersTimeReal: "realtime 9:30-10"
+```
 
 ## Scoreboard: `score`
 
-With this condition you can check if the score in a specified objective on a scoreboard is greater or equal to specified amount. The first argument is the name of the objective, second one is amount (an integer).
+**persistent**
 
-!!! example
-    ```YAML
-    score kills 20
-    ```
+With this condition you can check if the score in a specified objective on a scoreboard is greater or equal to specified amount.
+
+| Parameter              | Syntax         | Default Value          | Explanation                               |
+|------------------------|----------------|------------------------|-------------------------------------------|
+| _scoreboard objective_ | Objective name | :octicons-x-circle-16: | The name of the scoreboard objective      |
+| _count_                | Number         | :octicons-x-circle-16: | The minimum whole number of the objective |
+
+```YAML title="Example"
+hasAtLeastTenKills: "score kills 10"
+```
 
 ## Sneaking: `sneak`
 
@@ -479,22 +510,32 @@ This condition is met if the block at specified location matches the given mater
 
 ## Time: `time`
 
-There must be specific (Minecraft) time on the player's world for this condition to return true. You need to specify two hour numbers separated by dash. These number are normal 24-hour format hours. The first must be smaller than the second. If you want to achieve time period between 23 and 2 you need to negate the condition.
+**static**
 
-!!! example
-    ```YAML
-    time 2-23
-    ```
+There must be specific (Minecraft) time on the world for this condition to return true.
+
+| Parameter  | Syntax            | Default Value          | Explanation                                                                                                  |
+|------------|-------------------|------------------------|--------------------------------------------------------------------------------------------------------------|
+| _Timespan_ | startTime-endTime | :octicons-x-circle-16: | Two points of time seperated by dash in the 24-hour format (0 - 24). The minutes are optional (hh or hh:mm). |
+| _world_    | world:name        | player location        | The world to check for the time. Can be a variable.                                                          |
+
+
+```YAML title="Example"
+allDay: "time 6-19"
+midnightInOverworld: "time 23:30-0:30 world:overworld"
+knoppersTime: "time 9:30-10"
+exactAtTwelveAtPlayersHome: "time 12-12 world:%ph.player_home_world%"
+```
 
 ## Variable: `variable`
 
 This condition checks if a variable value matches given [regular expression](../Data-Formats.md#regex-regular-expressions)
 
-| Parameter   | Syntax          | Default Value          | Explanation                                                                                                                             |
-|-------------|-----------------|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| _Variable_  | Any variable    | :octicons-x-circle-16: | The variable (surrounded by `%` characters).                                                                                            |
+| Parameter   | Syntax          | Default Value          | Explanation                                                                                                                                |
+|-------------|-----------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| _Variable_  | Any variable    | :octicons-x-circle-16: | The variable (surrounded by `%` characters).                                                                                               |
 | _Regex_     | A regex pattern | :octicons-x-circle-16: | The [regex](../Data-Formats.md#regex-regular-expressions) that the variables value must match. The regex can also be stored in a variable. |
-| _forceSync_ | Keyword         | False                  | Forces the variables to be resolved on the main thread. This may be required by some third party variables.                             |
+| _forceSync_ | Keyword         | False                  | Forces the variables to be resolved on the main thread. This may be required by some third party variables.                                |
 
 
 ```YAML title="Example"
@@ -512,12 +553,21 @@ denizenVariableThis: "variable %ph.denizen_<player.has_flag[flag_name]>% true fo
 
 ## Weather: `weather`
 
+**static**
+
 There must be a specific weather for this condition to return true. There are three possible options: sun, rain and storm. Note that `/toggledownfall` does not change the weather, it just does what the name suggests: toggles downfall. The rain toggled off will still be considered as rain! Use `/weather clear` instead.
 
-!!! example
-    ```YAML
-    weather sun
-    ```
+| Parameter | Syntax     | Default Value          | Explanation                         |
+|-----------|------------|------------------------|-------------------------------------|
+| _weather_ | Keyword    | :octicons-x-circle-16: | The weather to check for.           |
+| _world_   | world:name | player location        | The world to check for the weather. |
+
+
+```YAML title="Example"
+isSunny: "weather sun"
+weatherInPlayerWorld: "weather rain world:%ph.player_home_world%"
+overworldIsRainy: "weather rain world:overworld"
+```
 
 ## World: `world`
 

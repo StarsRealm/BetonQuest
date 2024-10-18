@@ -10,7 +10,6 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,36 +17,45 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The plugins config file
+ * The plugins config file.
  */
-@SuppressWarnings("PMD.CommentRequired")
 public class RPGMenuConfig extends SimpleYMLSection {
+    /**
+     * The messages section of the configuration.
+     */
+    private static final String MESSAGES = "messages";
 
     /**
-     * Default value if menus close when an item was clicked
+     * Default value if menus close when an item was clicked.
      */
     public final boolean defaultCloseOnClick;
 
     /**
-     * Hashmap containing all messages for each language
+     * Hashmap containing all messages for each language.
      */
     private final Map<String, Map<String, String>> messages;
 
     /**
-     * List containing all languages
+     * List containing all languages.
      */
     private final List<String> languages;
 
-    @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "NullAway"})
-    public RPGMenuConfig(final ConfigAccessor menuConfigAccessor) throws InvalidConfigurationException, FileNotFoundException {
+    /**
+     * Creates a new config for thr RPGMenu.
+     *
+     * @param menuConfigAccessor the provider for the config
+     * @throws InvalidConfigurationException if the backing configuration is empty
+     */
+    @SuppressWarnings("NullAway")
+    public RPGMenuConfig(final ConfigAccessor menuConfigAccessor) throws InvalidConfigurationException {
         super(null, "menuConfig.yml", menuConfigAccessor.getConfig());
         //load languages
-        if (!config.contains("messages") || !config.isConfigurationSection("messages")) {
-            throw new Missing("messages");
+        if (!config.contains(MESSAGES) || !config.isConfigurationSection(MESSAGES)) {
+            throw new Missing(MESSAGES);
         }
         this.messages = new HashMap<>();
         this.languages = new ArrayList<>();
-        languages.addAll(config.getConfigurationSection("messages").getKeys(false));
+        languages.addAll(config.getConfigurationSection(MESSAGES).getKeys(false));
         //load configuration settings
         this.defaultCloseOnClick = getBoolean("default_close");
 
@@ -70,7 +78,7 @@ public class RPGMenuConfig extends SimpleYMLSection {
     }
 
     /**
-     * Get a message in a specific language by it's key
+     * Get a message in a specific language by its key.
      *
      * @param lang    language of the message
      * @param key     key of the message
@@ -94,7 +102,7 @@ public class RPGMenuConfig extends SimpleYMLSection {
     }
 
     /**
-     * Get a translated message for a command sender
+     * Get a translated message for a command sender.
      *
      * @param sender  who the message should be displayed to
      * @param key     key of the message
@@ -110,7 +118,7 @@ public class RPGMenuConfig extends SimpleYMLSection {
     }
 
     /**
-     * Sends a predefined message to a command sender
+     * Sends a predefined message to a command sender.
      *
      * @param sender  the recipient of the message
      * @param key     the key of the message
@@ -121,7 +129,7 @@ public class RPGMenuConfig extends SimpleYMLSection {
     }
 
     /**
-     * Load a message from file into hash map
+     * Load a message from file into hash map.
      *
      * @param key key of the message
      * @throws Missing if message isn't found in default language

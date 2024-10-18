@@ -11,6 +11,18 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `npc_text_fill_new_lines` should lined be filled between the NPC text and the player answer options
 - `world` condition now supports variables for the world name
 - underscores are now escapable in item names and lore via `\_`
+- `weather` condition now allows to define a world, which can be a variable and can now be used in static context
+- `time` condition now allows to define a world, which can be a variable and can now be used in static context
+- `time` condition now supports minutes
+- `paste` event can now rotate schematics
+- `permission` condition now supports variables
+- `moonCycle` condition now allows to define a world, which can be a variable and can now be used in static context
+- global variable support for npc ids and condition ids in `effectlib` section
+- `and` condition can now be static
+- missing tab-completion and documentation for globalpoints and globaltags command
+- `party` condition now supports a location variable, to be used in a static context
+- `enitity` condition now supports variables for the entity name
+- `mmochangeclass` objective for MMOCore that listens for a player changing their class
 ### Changed
 - `spawn` event now only spawn mobs and no other entities
 ### Deprecated
@@ -19,6 +31,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - broken title check in book `QuestItem`
 - BlockSelector did not match exact block matches and started regex matching causing performance issues during load and reload
 - wrong order of arguments in fire work effects
+- non-static `variables` causing cross conversation validation to break
+- LuckPerms integration not pushing the permission update to the connected servers correctly.
+- `crafting` objective where complex recipes are not recognized
+- `hieght` condition where variable locations threw an exception
 ### Security
 
 ## [2.1.3] - 2024-08-06

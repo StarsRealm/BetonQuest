@@ -23,7 +23,6 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,7 +69,7 @@ public class RPGMenu {
     }
 
     /**
-     * If the player of the {@link OnlineProfile} has an open menu it closes it
+     * If the player of the {@link OnlineProfile} has an open menu it closes it.
      *
      * @param onlineProfile the {@link OnlineProfile} of the player
      */
@@ -79,7 +78,7 @@ public class RPGMenu {
     }
 
     /**
-     * Returns if the player has opened the specified menu
+     * Returns if the player has opened the specified menu.
      *
      * @param onlineProfile the player form the {@link OnlineProfile} for which should be checked
      * @param menuID        the id of the menu the player should have opened,
@@ -92,7 +91,7 @@ public class RPGMenu {
     }
 
     /**
-     * Returns if the player has opened any menu
+     * Returns if the player has opened any menu.
      *
      * @param onlineProfile guess what: the onlineprofile of the player!
      * @return true if player has opened a menu, false if not
@@ -109,7 +108,7 @@ public class RPGMenu {
     }
 
     /**
-     * Open a menu for a player
+     * Open a menu for a player.
      *
      * @param onlineProfile the player of the {@link OnlineProfile} for which the menu should be opened
      * @param menuID        id of the menu
@@ -139,7 +138,7 @@ public class RPGMenu {
     }
 
     /**
-     * Reload all plugin data
+     * Reload all plugin data.
      *
      * @return information if the reload was successful
      */
@@ -156,7 +155,7 @@ public class RPGMenu {
         final ReloadInformation info = new ReloadInformation();
         try {
             this.config = new RPGMenuConfig(menuConfigAccessor);
-        } catch (final InvalidConfigurationException | FileNotFoundException e) {
+        } catch (final InvalidConfigurationException e) {
             log.error("Invalid Configuration.", e);
             info.addError(e);
             info.result = ReloadResult.FAILED;
@@ -190,7 +189,7 @@ public class RPGMenu {
     }
 
     /**
-     * Reloads only one menu with the given menuID
+     * Reloads only one menu with the given menuID.
      *
      * @param menuID menuID of the menu which should be reloaded
      * @return information if the reload was successful
@@ -232,25 +231,25 @@ public class RPGMenu {
     }
 
     /**
-     * Tells whether a reload was successful
+     * Tells whether a reload was successful.
      */
     public enum ReloadResult {
         /**
-         * If all data could be successfully loaded
+         * If all data could be successfully loaded.
          */
         FULL_SUCCESS,
         /**
-         * If reload was successful but some menus could not be loaded
+         * If reload was successful but some menus could not be loaded.
          */
         SUCCESS,
         /**
-         * If reload completely failed
+         * If reload completely failed.
          */
         FAILED
     }
 
     /**
-     * Class containing all information about a reload
+     * Class containing all information about a reload.
      */
     public static class ReloadInformation {
         private final List<String> errorMessages = new ArrayList<>();
