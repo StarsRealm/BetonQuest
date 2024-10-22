@@ -6,8 +6,15 @@
     <mirror>
       <id>BetonQuest-Mirror</id>
       <url>https://nexus.betonquest.org/repository/default/</url>
-      <mirrorOf>*</mirrorOf>
+      <mirrorOf>*,!AliYun-Snapshot</mirrorOf>
     </mirror>
   </mirrors>
 
+  <servers>
+    <server>
+      <id>AliYun-Snapshot</id>
+      <username>${env.ALY_USER}</username>
+      <password>${env.ALY_PASSWORD}</password>
+    </server>
+  </servers>
 </settings>
