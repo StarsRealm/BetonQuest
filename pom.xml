@@ -5,7 +5,7 @@
 
   <properties>
     <revision>2.2.0</revision>
-    <changelist>-SNAPSHOT</changelist>
+    <changelist>-STARSREALM-SNAPSHOT</changelist>
     <betonquest.version>${revision}-DEV-UNOFFICIAL</betonquest.version>
     <minecraft.api.version>1.18</minecraft.api.version>
     <java.api.version>21</java.api.version>
