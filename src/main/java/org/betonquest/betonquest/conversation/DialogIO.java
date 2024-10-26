@@ -16,14 +16,11 @@ import java.util.List;
  */
 public class DialogIO implements ConversationIO {
 
-
     private final Entity entity;
     private final Player player;
     private final CitizensConversation conv;
     private final List<String> endConversations = new ArrayList<>();
-
     private NpcDialogueForm npcDialogueForm;
-
 
     public DialogIO(final Conversation conv, final OnlineProfile onlineProfile) {
         this.conv = (CitizensConversation) conv;
@@ -37,25 +34,31 @@ public class DialogIO implements ConversationIO {
     @Override
     public void setNpcResponse(final String npcName, final String response) {
         npcDialogueForm.hasNextForm(true).bindEntity(entity).dialogue(response).title(npcName);
+
         npcDialogueForm.handler((s, i) -> {
             endConversations.add(s);
             conv.passPlayerAnswer(i + 1);
         });
 
         npcDialogueForm.closeHandler(close -> {
-            if(!endConversations.contains(close)) {
+            if (!endConversations.contains(close)) {
                 conv.endConversation();
             }
         });
     }
 
     @Override
-    public void addPlayerOption(final String option) {
+    public void addPlayerOption(String option) {
         final NpcDialogueButton button = new NpcDialogueButton();
+        if (option.endsWith("[end]")) {
+            option = option.replace("[end]", "");
+            button.setHasNextForm(false);
+        } else {
+            button.setHasNextForm(true);
+        }
         button.setMode(NpcDialogueButton.ButtonMode.BUTTON_MODE);
         button.setText(option);
         button.setCommands(new ArrayList<>());
-        button.setHasNextForm(true);
         npcDialogueForm.buttons().add(button);
     }
 
