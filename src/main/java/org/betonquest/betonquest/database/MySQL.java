@@ -63,7 +63,7 @@ public class MySQL extends Database {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(
-                    "jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database + "?&useSSL=false", this.user, this.password);
+                    "jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database + "?allowPublicKeyRetrieval=true&useSSL=false", this.user, this.password);
             final String connectionClassName = connection.getClass().getName();
             if (!connectionClassName.startsWith("com.mysql.")) {
                 log.warn("External source modified or changed the MySQL connector! We can not guarantee that BetonQuest will work correctly with this connector: " + connectionClassName);
