@@ -462,6 +462,18 @@ With this condition you can check if the score in a specified objective on a sco
 hasAtLeastTenKills: "score kills 10"
 ```
 
+## Scoreboard Tag: `scoretag`
+
+This scoreboard condition checks if the player has a specified scoreboard tag. The kind of tags that are used by vanilla Minecraft and not the [betonquest tags](#tag-tag).
+
+| Parameter        | Syntax   | Default Value          | Explanation                     |
+|------------------|----------|------------------------|---------------------------------|
+| _scoreboard tag_ | Tag name | :octicons-x-circle-16: | The name of the scoreboard tag. |
+
+```YAML title="Example"
+hasVanillaTag: "scoretag vanilla_tag"
+```
+
 ## Sneaking: `sneak`
 
 Sneak condition is only true when the player is sneaking. This would probably be useful for creating traps, I'm not sure. There are no arguments for this one.
@@ -528,6 +540,8 @@ exactAtTwelveAtPlayersHome: "time 12-12 world:%ph.player_home_world%"
 ```
 
 ## Variable: `variable`
+
+**static**
 
 This condition checks if a variable value matches given [regular expression](../Data-Formats.md#regex-regular-expressions)
 

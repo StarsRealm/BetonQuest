@@ -135,14 +135,16 @@
     <dependency>
       <groupId>io.lumine</groupId>
       <artifactId>Mythic-Dist</artifactId>
-      <version>5.6.2</version>
+      <version>5.7.2</version>
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
+
+    <!-- from phoenixdevt repository -->
     <dependency>
       <groupId>io.lumine</groupId>
       <artifactId>MythicLib-dist</artifactId>
-      <version>1.6-SNAPSHOT</version>
+      <version>1.7.1-SNAPSHOT</version>
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
@@ -160,6 +162,7 @@
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
+
 
     <!-- from citizensnpcs repository -->
     <dependency>
@@ -258,6 +261,14 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- from mg repository -->
+    <dependency>
+      <groupId>com.bergerkiller.bukkit</groupId>
+      <artifactId>TrainCarts</artifactId>
+      <version>1.20.6-v1</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
 
     <!-- from jitpack repository -->
     <dependency>
@@ -304,13 +315,6 @@
       <groupId>com.github.Zrips</groupId>
       <artifactId>Jobs</artifactId>
       <version>b537ec4f36</version>
-      <scope>provided</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>com.github.promcteam</groupId>
-      <artifactId>proskillapi</artifactId>
-      <version>75674d1f35</version>
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
@@ -373,6 +377,13 @@
       <groupId>dev.aurelium</groupId>
       <artifactId>auraskills-api-bukkit</artifactId>
       <version>2.2.0</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>studio.magemonkey</groupId>
+      <artifactId>fabled</artifactId>
+      <version>1.0.2-R1</version>
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
@@ -507,7 +518,7 @@
       <url>https://mvn.lumine.io/repository/maven-public/</url>
     </repository>
     <repository>
-      <id>betonquest-phoenixdevelopment-repo</id>
+      <id>betonquest-phoenixdevt-repo</id>
       <url>https://nexus.phoenixdevt.fr/repository/maven-public/</url>
     </repository>
     <repository>
@@ -545,6 +556,11 @@
     <repository>
       <id>betonquest-sonatype-snapshots-repo</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+    <repository>
+      <id>betonquest-mg-dev-everything-repo</id>
+      <name>ci.mg-dev.eu repository</name>
+      <url>https://ci.mg-dev.eu/plugin/repository/everything</url>
     </repository>
     <repository>
       <id>betonquest-minecraft-repo</id>
