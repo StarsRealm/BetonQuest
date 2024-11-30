@@ -31,6 +31,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `traincartsexit` objective that executes when the player exited a train
   - `traincartsride` condition to check if the player is riding a specific named train
 - `scoretag` event and condition
+- `action` objective now supports configuring the hand used for the interaction, preventing multiple objective completions at the same time
 ### Changed
 - `spawn` event now only spawn mobs and no other entities
 - ProSkillAPI rename to Fabled
@@ -52,6 +53,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `Journal` interaction with blocks like lecterns
 - sections that are created in templates by write operations, where no edits should actually be done
   - this caused a lot of "ghost" sections that could not be loaded like schedules, menus and manny more
+- Conversations work in 1.21.3 again
 ### Security
 
 ## [2.1.3] - 2024-08-06
