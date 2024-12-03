@@ -66,6 +66,31 @@ thead span {
 }
 </style>
 
+<div class="betonquest-flex-container">
+  <div class="betonquest-flex-item">
+    <h1 class="betonquest-header betonquest-text-color">Unique Quests and Storylines</h1>
+    <ul>
+      <li class="betonquest-list"><b>Quest Tools:</b> Logs, Menus, Items, Notifications</li>
+      <li class="betonquest-list"><b>Conversations:</b> Interactive, Multi-Path, Translatable</li>
+      <li class="betonquest-list"><b>Extensive</b> 32 Plugin Integrations, API</li>
+      <li class="betonquest-list"><b>Free</b> and Open Source</li>
+    </ul>
+    </p>
+    <a href="{{ page.next_page.url | url }}" title="Get started with our tutorials"
+       class="md-button md-button--primary betonquest-buttons">
+      Quick start
+    </a>
+    <a href="#what-server-owners-say" title="More information" class="md-button betonquest-buttons">
+      Read more
+    </a>
+  </div>
+  <div class="betonquest-flex-item">
+    <div class="betonquest-flex-logo">
+      <img src="_media/brand/Logo/Logo1K.png" alt="" draggable="false">
+    </div>
+  </div>
+</div>
+
 <video controls loop src="_media/content/Home/Features/Trailer.mp4" poster="_media/content/Home/OverviewVideoPreview.jpg" style="box-shadow: 0 0 30px black;" width="100%">
   Sorry, your browser doesn't support embedded videos.
 </video>
@@ -134,7 +159,7 @@ Sometimes, user reviews describe a plugin better than the author can:
 | Free                     |                :white_check_mark:                |        :white_check_mark:         |         :white_check_mark:         | :white_check_mark: |     :white_check_mark:     |         :x:  (20$)         |       :x:  (19.99$)        |
 | OpenSource               |                :white_check_mark:                |        :white_check_mark:         |         :white_check_mark:         | :white_check_mark: |     :white_check_mark:     |            :x:             |            :x:             |
 | API                      |                :white_check_mark:                |        :white_check_mark:         |         :white_check_mark:         | :white_check_mark: |     :white_check_mark:     | :material-check-bold: [^1] | :material-check-bold: [^1] |
-| Version Support          |                   1.18 - 1.20                    |            1.8 - 1.20             |             1.8 - 1.20             |    1.17 - 1.20     |         1.8 - 1.19         |         1.7 - 1.20         |         1.7 - 1.20         |
+| Version Support          |                   1.18 - 1.21                    |            1.8 - 1.21             |             1.8 - 1.21             |    1.17 - 1.21     |         1.8 - 1.21         |         1.7 - 1.21         |         1.7 - 1.21         |
 | Integrated Plugins       | @snippet:constants:totalIntegratedPluginsNumber@ |                14                 |                 16                 |         22         |             29             |             28             |             1              |
 | BetonQuest integration   |                                                  |    :material-check-bold: [^5]     |                :x:                 | :white_check_mark: |            :x:             |            :x:             |            :x:             |
 | Ingame Editor            |                     :x: [^6]                     |         Chat & GUI (Paid)         |                :x:                 | :white_check_mark: |            GUI             |            GUI             |            GUI             |
