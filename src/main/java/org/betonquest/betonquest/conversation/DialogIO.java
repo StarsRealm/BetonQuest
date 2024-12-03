@@ -58,7 +58,7 @@ public class DialogIO implements ConversationIO {
     @Override
     public void addPlayerOption(final String option) {
         final NpcDialogueButton button = new NpcDialogueButton();
-        if (option.endsWith("[end]")) {
+        if (option.contains("[end]")) {
             button.setText(option.replace("[end]", ""));
             button.setHasNextForm(false);
         } else {
@@ -72,6 +72,11 @@ public class DialogIO implements ConversationIO {
 
     @Override
     public void display() {
+        if (npcDialogueForm.buttons().getFirst().getText().contains("[pass]")) {
+            npcDialogueForm.title(0 + npcDialogueForm.title());
+        } else {
+            npcDialogueForm.title(npcDialogueForm.buttons().size() + npcDialogueForm.title());
+        }
         npcDialogueForm.send(player);
     }
 
