@@ -33,7 +33,11 @@ public class DialogIO implements ConversationIO {
 
     @Override
     public void setNpcResponse(final String npcName, final String response) {
-        npcDialogueForm.hasNextForm(true).bindEntity(entity).dialogue(response).title(npcName);
+        if(response.endsWith("[player]")) {
+            npcDialogueForm.hasNextForm(true).bindEntity(entity).dialogue(responsereplace("[player]", "")).title(player.getName());
+        } else {
+            npcDialogueForm.hasNextForm(false).bindEntity(entity).dialogue(response).title(npcName);
+        }
 
         npcDialogueForm.handler((s, i) -> {
             endConversations.add(s);
