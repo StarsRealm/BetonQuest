@@ -668,7 +668,7 @@ public class BetonQuest extends JavaPlugin {
         lastExecutionCache.reload();
 
         // reload updater settings
-        getUpdater().search();
+        //getUpdater().search();
         // stop current global locations listener
         // and start new one with reloaded configs
         log.debug("Restarting global locations");

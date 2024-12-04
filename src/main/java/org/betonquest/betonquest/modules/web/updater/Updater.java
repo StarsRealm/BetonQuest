@@ -120,7 +120,7 @@ public class Updater {
         this.instantSource = instantSource;
         this.lastNotification = new HashMap<>();
 
-        search();
+        //search();
     }
 
     private String getUpdateNotification(final boolean automaticDownload) {
