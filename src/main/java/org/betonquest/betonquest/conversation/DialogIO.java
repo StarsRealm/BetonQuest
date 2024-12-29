@@ -1,5 +1,6 @@
 package org.betonquest.betonquest.conversation;
 
+import com.google.common.base.Preconditions;
 import com.starsrealm.starock.api.form.element.NpcDialogueButton;
 import com.starsrealm.starock.form.NpcDialogueForm;
 import org.betonquest.betonquest.api.profiles.OnlineProfile;
@@ -73,9 +74,9 @@ public class DialogIO implements ConversationIO {
     @Override
     public void display() {
         if (npcDialogueForm.buttons().getFirst().getText().contains("[pass]")) {
-            npcDialogueForm.title(0 + npcDialogueForm.title());
+            npcDialogueForm.title(createArgsText(npcDialogueForm.title(), 0));
         } else {
-            npcDialogueForm.title(npcDialogueForm.buttons().size() + npcDialogueForm.title());
+            npcDialogueForm.title(createArgsText(npcDialogueForm.title(), npcDialogueForm.buttons().size()));
         }
         npcDialogueForm.send(player);
     }
@@ -89,5 +90,17 @@ public class DialogIO implements ConversationIO {
     @Override
     public void end() {
         this.endConversations.clear();
+    }
+
+    public static String createArgsText(final String text, final int number) {
+        //the title max length is 32
+        final var filteredText = text.replaceAll("§", "§§");
+        Preconditions.checkArgument(filteredText.length() <= 31);
+        final var builder = new StringBuilder();
+        builder.append(text).append("\t".repeat(Math.max(0, 31 - filteredText.length())));
+        Preconditions.checkArgument(number <= 9);
+        Preconditions.checkArgument(number >= 0);
+        builder.append(number);
+        return builder.toString();
     }
 }
