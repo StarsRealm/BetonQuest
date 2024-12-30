@@ -25,15 +25,14 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Handles the configuration of the plugin
+ * Handles the configuration of the plugin.
  */
-@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.GodClass", "PMD.TooManyMethods", "PMD.UseObjectForClearerAPI",
-        "PMD.CommentRequired", "PMD.AvoidLiteralsInIfCondition", "PMD.AvoidFieldNameMatchingTypeName",
-        "PMD.ClassNamingConventions", "NullAway.Init"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.CommentRequired", "NullAway.Init"})
 public final class Config {
     /**
      * Custom {@link BetonQuestLogger} instance for this class.
@@ -61,7 +60,6 @@ public final class Config {
      * @param plugin the {@link BetonQuest} plugin instance
      * @param config the {@link ConfigurationFile} to load from
      */
-    @SuppressWarnings({"PMD.AssignmentToNonFinalStatic", "PMD.CognitiveComplexity", "PMD.NPathComplexity"})
     @SuppressFBWarnings("EI_EXPOSE_STATIC_REP2")
     public static void setup(final BetonQuest plugin, final ConfigurationFile config) {
         Config.plugin = plugin;
@@ -325,7 +323,7 @@ public final class Config {
             try {
                 player.playSound(player.getLocation(), Sound.valueOf(rawSound), 1F, 1F);
             } catch (final IllegalArgumentException e) {
-                LOG.warn("Unknown sound type: " + rawSound, e);
+                player.playSound(player.getLocation(), rawSound.toLowerCase(Locale.ROOT), 1F, 1F);
             }
         }
     }

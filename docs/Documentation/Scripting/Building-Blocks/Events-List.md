@@ -257,14 +257,15 @@ so those events should not be blocked by any conditions!
 You can use the `cancelOnLogout` argument to stop the folder executing any remaining events if the player disconnects.
 
 
-| Parameter        | Syntax            | Default Value          | Explanation                                                                                     |
-|------------------|-------------------|------------------------|-------------------------------------------------------------------------------------------------|
-| _events to run_  | eventName1,event2 | :octicons-x-circle-16: | One or multiple events to run. Contains event names seperated by commas.                        |
-| _delay_          | Keyword           | without delay          | The delay before the folder starts executing it's events.                                       |
-| _period_         | period:number     | without delay          | The time between each event of the folder.                                                      |
-| _time unit_      | Keyword           | Seconds                | The unit of time to use for delay and period. Either `ticks` or `minutes`. Omit to use seconds. |
-| _random_         | random:number     | Disabled               | Enables "random mode". Will randomly pick the defined amount of events .                        |
-| _cancelOnLogout_ | Keyword           | Disabled               | If enabled, the folder will stop executing events if the player disconnects.                    |
+| Parameter          | Syntax                       | Default Value          | Explanation                                                                                     |
+|--------------------|------------------------------|------------------------|-------------------------------------------------------------------------------------------------|
+| _events to run_    | eventName1,event2            | :octicons-x-circle-16: | One or multiple events to run. Contains event names seperated by commas.                        |
+| _delay_            | Keyword                      | without delay          | The delay before the folder starts executing it's events.                                       |
+| _period_           | period:number                | without delay          | The time between each event of the folder.                                                      |
+| _time unit_        | Keyword                      | Seconds                | The unit of time to use for delay and period. Either `ticks` or `minutes`. Omit to use seconds. |
+| _random_           | random:number                | Disabled               | Enables "random mode". Will randomly pick the defined amount of events .                        |
+| _cancelOnLogout_   | Keyword                      | Disabled               | If enabled, the folder will stop executing events if the player disconnects.                    |
+| _cancelConditions_ | cancelConditions:cond1,cond2 | Disabled               | If enabled, the folder will stop executing events if the conditions are true.                   |
 
 
 ```YAML title="Examples" 
@@ -583,7 +584,7 @@ Can only effect loaded entities!
 | _location_  | [Unified Location Formatting](../Data-Formats.md#unified-location-formating) | :octicons-x-circle-16: | Required. The center location of the target entity's.                                                                                       |
 | _radius_    | Number                                                                       | :octicons-x-circle-16: | Required. The radius around the location. Can be a variable.                                                                                |
 | _name_      | `name:name`                                                                  | :octicons-x-circle-16: | Name of the entity. All `_` will be replaced with spaces.                                                                                   |
-| _marked_    | `marked:mark`                                                                | :octicons-x-circle-16: | Mark of the entity (form the [spawn event](../../Scripting/Building-Blocks/Events-List.md#spawn-mob-spawn) for example). Can be a variable. |
+| _marked_    | `marked:mark`                                                                | :octicons-x-circle-16: | Mark of the entity (from the [spawn event](../../Scripting/Building-Blocks/Events-List.md#spawn-mob-spawn) for example). Can be a variable. |
 | _kill_      | `kill`                                                                       | :octicons-x-circle-16: | Whether to remove or actually kill the entity (if possible).                                                                                |
 
 ```YAML title="Example"
@@ -890,4 +891,3 @@ events:
   setShortRain: "weather rain duration:60 world:rpgworld"
   setStorm: "weather storm duration:%point.tribute.left:150%"
 ```
-    

@@ -6,10 +6,16 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - ${maven.build.timestamp}
 ### Added
+- A Bukkit event which fires when a player's points change
+- `folder` event now has an argument `cancelConditions` to cancel a running folder
+- `action` objective now supports configuring the hand used for the interaction, preventing multiple objective completions at the same time on right click
 ### Changed
 ### Deprecated
 ### Removed
 ### Fixed
+- fixed NPC navigation by giving better error messages and handling the stuck action correctly
+- custom sounds from resourcepacks could not be used in conversation start and end sound
+- `chestput` objective caused that no chest could be opened on the server when `multipleaccess` was forbidden(default) 
 ### Security
 
 ## [2.2.0] - 2024-12-01
