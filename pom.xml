@@ -76,13 +76,13 @@
     <dependency>
       <groupId>com.starsrealm.starock</groupId>
       <artifactId>plugin</artifactId>
-      <version>1.6.1-20241205.153702-5</version>
+      <version>1.6.4-20250104.111013-2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.starsrealm.starock</groupId>
       <artifactId>api</artifactId>
-      <version>1.6.1-20241205.153702-5</version>
+      <version>1.6.4-20250104.111013-2</version>
       <scope>provided</scope>
     </dependency>
     <!-- from enginehub repository -->
